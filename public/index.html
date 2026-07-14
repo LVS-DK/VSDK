@@ -554,6 +554,7 @@
   .vc-badge.member{background:var(--member-soft);color:var(--member);}
   .vc-badge.nonmember{background:var(--nonmember-soft);color:var(--nonmember);}
   .vc-meta{font-size:12.5px;color:var(--ink-soft);margin-top:3px;}
+  .vc-note-flag{font-size:11px;}
   .vc-kommune{font-size:11.5px;color:var(--ink-soft);margin-top:5px;font-style:italic;}
 
   .empty-state{
@@ -737,14 +738,19 @@
   }
   .br-actions button:hover{ background:var(--line); }
   .medie-row{
-    display:flex; align-items:center; justify-content:space-between; gap:8px;
-    padding:8px 12px; background:var(--panel); border-radius:8px; font-size:13.5px;
+    display:flex; align-items:flex-start; justify-content:space-between; gap:8px;
+    padding:9px 12px; background:var(--panel); border-radius:8px; font-size:13.5px;
   }
-  .medie-row .mr-remove{ display:none; }
-  body.superuser-mode .medie-row .mr-remove{
-    display:flex; border:none; background:var(--panel-2); width:22px; height:22px; border-radius:50%;
-    cursor:pointer; font-size:11px; color:var(--ink-soft); align-items:center; justify-content:center;
+  .medie-row .mr-main{ display:flex; flex-direction:column; gap:2px; min-width:0; }
+  .medie-row .mr-name{ font-weight:600; }
+  .medie-row .mr-note{ font-size:12px; color:var(--ink-soft); white-space:pre-wrap; }
+  .medie-row .mr-actions{ display:none; gap:4px; flex-shrink:0; }
+  body.superuser-mode .medie-row .mr-actions{ display:flex; }
+  .mr-actions button{
+    border:none; background:var(--panel-2); width:22px; height:22px; border-radius:50%;
+    cursor:pointer; font-size:11px; color:var(--ink-soft); line-height:1;
   }
+  .mr-actions button:hover{ background:var(--line); }
   .empty-hint{ font-size:12.5px; color:var(--ink-soft); font-style:italic; padding:4px 2px; }
   .inline-add-form{
     background:var(--panel); border-radius:9px; padding:14px; margin-top:8px;
@@ -972,6 +978,10 @@
         <select id="f_tilknytning"></select>
       </div>
       <div class="field">
+        <label for="f_note">Note</label>
+        <textarea id="f_note" placeholder="F.eks. særlige forhold, kontaktperson, aftaler eller andet at huske..."></textarea>
+      </div>
+      <div class="field superuser-only" id="tagManagerField">
         <label>Administrér tilknytningstyper</label>
         <div class="tag-manager" id="tagManager"></div>
         <div class="add-tag-row">
@@ -1031,9 +1041,13 @@
             <label for="mf_navn">Medie</label>
             <input type="text" id="mf_navn" placeholder="F.eks. Lokalavisen X, TV2 Region...">
           </div>
+          <div class="field">
+            <label for="mf_note">Note</label>
+            <textarea id="mf_note" placeholder="F.eks. journalistkontakt, tidligere dækning, aftaler..."></textarea>
+          </div>
           <div class="modal-footer">
             <button class="btn btn-ghost" id="medieCancelBtn">Annullér</button>
-            <button class="btn btn-primary" id="medieSaveBtn">Tilføj</button>
+            <button class="btn btn-primary" id="medieSaveBtn">Gem medie</button>
           </div>
         </div>
       </div>
@@ -1070,11 +1084,11 @@ const els = {};
  "searchInput","searchClear","newVenueBtn","dkMap","mapTooltip","statTotal","statMember","statNonmember",
  "shName","shClearBtn","shCount","shActions","byraadBtn","listScroll","scopeBanner",
  "venueOverlay","venueModalTitle","venueModalClose","toggleStatusLabel","memberToggle",
- "f_navn","f_adresse","f_kommune","f_telefon","f_email","f_type","f_tilknytning",
+ "f_navn","f_adresse","f_kommune","f_telefon","f_email","f_type","f_tilknytning","f_note",
  "tagManager","newTagInput","addTagBtn","deleteVenueBtn","saveVenueBtn",
  "kommuneOverlay","kommuneModalTitle","kommuneModalClose",
  "byraadList","addByraadBtn","byraadForm","bf_navn","bf_borgmester","bf_socialudvalg","byraadCancelBtn","byraadSaveBtn",
- "medierSection","medieList","addMedieBtn","medieForm","mf_navn","medieCancelBtn","medieSaveBtn",
+ "medierSection","medieList","addMedieBtn","medieForm","mf_navn","mf_note","medieCancelBtn","medieSaveBtn",
  "toast"
 ].forEach(id => els[id] = document.getElementById(id));
 
@@ -1090,7 +1104,8 @@ function rowToVenue(r){
     email: r.email || '',
     type: r.type || '',
     tilknytning: r.tilknytning || '',
-    medlem: !!r.medlem
+    medlem: !!r.medlem,
+    note: r.note || ''
   };
 }
 function venueToRow(v){
@@ -1103,7 +1118,8 @@ function venueToRow(v){
     email: v.email,
     type: v.type,
     tilknytning: v.tilknytning,
-    medlem: v.medlem
+    medlem: v.medlem,
+    note: v.note || ''
   };
 }
 
@@ -1562,7 +1578,7 @@ function renderList(){
     card.className = 'venue-card' + (v.medlem ? '' : ' nonmember');
     card.innerHTML = `
       <div class="vc-top">
-        <div class="vc-name">${escapeHtml(v.navn)}</div>
+        <div class="vc-name">${escapeHtml(v.navn)}${v.note ? ' <span class=\"vc-note-flag\" title=\"Har en note\">📝</span>' : ''}</div>
         <div class="vc-badge ${v.medlem?'member':'nonmember'}">${v.medlem?'Medlem':'Ikke medlem'}</div>
       </div>
       <div class="vc-meta">${escapeHtml(v.type || 'Type ikke angivet')} · ${escapeHtml(v.tilknytning || 'Ukendt tilknytning')}</div>
@@ -1666,6 +1682,7 @@ function openVenueModal(id){
   els.f_telefon.value = v ? v.telefon : '';
   els.f_email.value = v ? v.email : '';
   els.f_type.value = v ? v.type : '';
+  els.f_note.value = v ? (v.note || '') : '';
   if(v && !db.tilknytninger.includes(v.tilknytning) && v.tilknytning){
     db.tilknytninger.push(v.tilknytning);
     sb.from('tilknytninger').insert({ navn: v.tilknytning }).then(({error})=>{ if(error) console.error(error); });
@@ -1703,6 +1720,7 @@ els.saveVenueBtn.addEventListener('click', async ()=>{
     email: els.f_email.value.trim(),
     type: els.f_type.value.trim(),
     tilknytning: els.f_tilknytning.value,
+    note: els.f_note.value.trim(),
     medlem: els.memberToggle.checked
   };
   const row = venueToRow(payload);
@@ -1806,7 +1824,17 @@ function renderMedieList(code){
   list.forEach(item => {
     const row = document.createElement('div');
     row.className = 'medie-row';
-    row.innerHTML = `<span>${escapeHtml(item.navn)}</span><button class="mr-remove" title="Fjern">✕</button>`;
+    row.innerHTML = `
+      <div class="mr-main">
+        <span class="mr-name">${escapeHtml(item.navn)}</span>
+        ${item.note ? `<span class="mr-note">${escapeHtml(item.note)}</span>` : ''}
+      </div>
+      <div class="mr-actions">
+        <button class="mr-edit" title="Redigér">✎</button>
+        <button class="mr-remove" title="Fjern">✕</button>
+      </div>
+    `;
+    row.querySelector('.mr-edit').addEventListener('click', () => openMedieForm(item));
     row.querySelector('.mr-remove').addEventListener('click', async () => {
       if(!isSuperuser) return;
       if(!confirm(`Fjern ${item.navn}?`)) return;
@@ -1817,6 +1845,16 @@ function renderMedieList(code){
     });
     els.medieList.appendChild(row);
   });
+}
+
+let editingMedieId = null;
+function openMedieForm(item){
+  if(!isSuperuser) return;
+  editingMedieId = item ? item.id : null;
+  els.mf_navn.value = item ? item.navn : '';
+  els.mf_note.value = item ? (item.note || '') : '';
+  els.medieForm.style.display = 'block';
+  els.mf_navn.focus();
 }
 
 function openByraadForm(member){
@@ -1832,6 +1870,8 @@ function openByraadForm(member){
 els.byraadBtn.addEventListener('click', ()=>{
   if(!selectedKommune) return;
   kommuneInfoCode = selectedKommune.code;
+  editingByraadId = null;
+  editingMedieId = null;
   els.kommuneModalTitle.textContent = selectedKommune.name + ' — Byråd & medier';
   els.byraadForm.style.display = 'none';
   els.medieForm.style.display = 'none';
@@ -1866,23 +1906,23 @@ els.byraadSaveBtn.addEventListener('click', async () => {
   }
 });
 
-els.addMedieBtn.addEventListener('click', () => {
-  if(!isSuperuser) return;
-  els.mf_navn.value = '';
-  els.medieForm.style.display = 'block';
-  els.mf_navn.focus();
-});
+els.addMedieBtn.addEventListener('click', () => openMedieForm(null));
 els.medieCancelBtn.addEventListener('click', () => { els.medieForm.style.display = 'none'; });
 els.medieSaveBtn.addEventListener('click', async () => {
   if(!isSuperuser || !kommuneInfoCode) return;
   const navn = els.mf_navn.value.trim();
   if(!navn){ showToast('Angiv et medienavn'); return; }
-  const arr = getMedieArray(kommuneInfoCode);
-  arr.push({ id: uid(), navn });
+  const note = els.mf_note.value.trim();
+  let arr = getMedieArray(kommuneInfoCode);
+  if(editingMedieId){
+    arr = arr.map(x => x.id === editingMedieId ? { ...x, navn, note } : x);
+  } else {
+    arr.push({ id: uid(), navn, note });
+  }
   if(await saveKommuneInfo(kommuneInfoCode, getByraadArray(kommuneInfoCode), arr)){
     els.medieForm.style.display = 'none';
     renderMedieList(kommuneInfoCode);
-    showToast('Medie tilføjet');
+    showToast('Medie gemt');
   }
 });
 

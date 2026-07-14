@@ -1,0 +1,2 @@
+# VSDK
+Danske Væresteder

@@ -233,6 +233,11 @@
     overflow-y:auto;
     padding:0 10px 14px 10px;
   }
+  .nav-tree.nav-events{
+    flex:0 0 auto;
+    max-height:160px;
+  }
+  .nav-quick-btn.is-sport.active{border-color:var(--select); background:var(--select-glow);}
   .nav-region{
     margin-bottom:2px;
   }
@@ -1021,9 +1026,15 @@
           <span class="nq-label">Ikke medlemmer</span>
           <span class="nq-count" id="nqNonmemberCount">0</span>
         </button>
+        <button class="nav-quick-btn is-sport" data-mode="sport-all">
+          <span class="nq-label">🏅 Deltaget i sport</span>
+          <span class="nq-count" id="nqSportCount">0</span>
+        </button>
       </div>
       <div class="nav-divider"><span>Regioner</span></div>
       <div class="nav-tree" id="navTree"></div>
+      <div class="nav-divider"><span>Sportsbegivenheder</span></div>
+      <div class="nav-tree nav-events" id="navEvents"></div>
     </div>
     <div class="map-pane">
       <svg id="dkMap" viewBox="0 0 780 950" preserveAspectRatio="xMidYMid meet">
@@ -1289,11 +1300,12 @@ let db = { vaerested: [], kommuneInfo: {}, tilknytninger: DEFAULT_TILKNYTNINGER.
 let selectedKommune = null; // {code, name}
 let editingVenueId = null;
 let searchQuery = "";
-let viewMode = "all"; // 'all' | 'members' | 'nonmembers' | 'kommune'
+let viewMode = "all"; // 'all' | 'members' | 'nonmembers' | 'kommune' | 'sport-all' | 'event'
 let expandedRegions = new Set();
+let eventFilterId = null;
 
 const els = {};
-["navQuick","navTree","nqAllCount","nqMemberCount","nqNonmemberCount",
+["navQuick","navTree","navEvents","nqAllCount","nqMemberCount","nqNonmemberCount","nqSportCount",
  "zoomInBtn","zoomOutBtn","zoomResetBtn","mapModeSelect","legendModeText","insetFrame","insetFrameTop","insetTitle","insetToggleBtn",
  "searchInput","searchClear","newVenueBtn","dkMap","mapTooltip","statTotal","statMember","statNonmember",
  "shName","shClearBtn","shCount","shActions","byraadBtn","listScroll","scopeBanner",
@@ -1712,14 +1724,33 @@ function selectKommune(code, name){
   } else {
     selectedKommune = { code, name };
     viewMode = 'kommune';
+    eventFilterId = null;
     const region = CODE_TO_REGION[code];
     if(region) expandedRegions.add(region);
   }
   renderAll();
 }
 
+function selectEventFilter(id){
+  if(viewMode === 'event' && eventFilterId === id){
+    eventFilterId = null;
+    viewMode = 'all';
+  } else {
+    eventFilterId = id;
+    viewMode = 'event';
+    selectedKommune = null;
+  }
+  if(els.searchInput.value){
+    els.searchInput.value = '';
+    searchQuery = '';
+    els.searchClear.style.display = 'none';
+  }
+  renderAll();
+}
+
 function clearSelection(){
   selectedKommune = null;
+  eventFilterId = null;
   viewMode = 'all';
   renderAll();
 }
@@ -1727,6 +1758,7 @@ function clearSelection(){
 function setViewMode(mode){
   viewMode = mode;
   selectedKommune = null;
+  eventFilterId = null;
   if(els.searchInput.value){
     els.searchInput.value = '';
     searchQuery = '';
@@ -1747,6 +1779,11 @@ function currentListVenues(){
     list = list.filter(v => v.medlem);
   } else if(viewMode === 'nonmembers'){
     list = list.filter(v => !v.medlem);
+  } else if(viewMode === 'sport-all'){
+    list = list.filter(v => db.signups.some(s => s.vaerestedId === v.id));
+  } else if(viewMode === 'event' && eventFilterId){
+    const venueIds = new Set(db.signups.filter(s => s.eventId === eventFilterId).map(s => s.vaerestedId));
+    list = list.filter(v => venueIds.has(v.id));
   }
   // viewMode === 'all' -> ingen filter, viser alle
   return list.sort((a,b) => a.navn.localeCompare(b.navn, 'da'));
@@ -1759,6 +1796,7 @@ function renderStats(){
 }
 
 function renderHeader(){
+  const ev = viewMode === 'event' && eventFilterId ? db.events.find(e => e.id === eventFilterId) : null;
   if(searchQuery){
     els.shName.textContent = `Søgeresultater: "${searchQuery}"`;
     els.shClearBtn.style.display = 'none';
@@ -1767,12 +1805,20 @@ function renderHeader(){
     els.shName.textContent = selectedKommune.name;
     els.shClearBtn.style.display = 'flex';
     els.shActions.style.display = 'flex';
+  } else if(viewMode === 'event' && ev){
+    els.shName.textContent = '🏅 ' + ev.navn;
+    els.shClearBtn.style.display = 'flex';
+    els.shActions.style.display = 'none';
   } else if(viewMode === 'members'){
     els.shName.textContent = 'Alle medlemmer';
     els.shClearBtn.style.display = 'none';
     els.shActions.style.display = 'none';
   } else if(viewMode === 'nonmembers'){
     els.shName.textContent = 'Alle ikke-medlemmer';
+    els.shClearBtn.style.display = 'none';
+    els.shActions.style.display = 'none';
+  } else if(viewMode === 'sport-all'){
+    els.shName.textContent = 'Deltaget i sport';
     els.shClearBtn.style.display = 'none';
     els.shActions.style.display = 'none';
   } else {
@@ -1787,6 +1833,10 @@ function renderHeader(){
     const s = kommuneStats(selectedKommune.code);
     els.scopeBanner.style.display = 'block';
     els.scopeBanner.textContent = `${s.members} medlem · ${s.nonmembers} ikke medlem i ${selectedKommune.name}`;
+  } else if(!searchQuery && viewMode === 'event' && ev){
+    const totalBrugere = db.signups.filter(s => s.eventId === ev.id).reduce((sum,s)=>sum+s.antalBrugere, 0);
+    els.scopeBanner.style.display = 'block';
+    els.scopeBanner.textContent = `${formatEventTid(ev.tid)} · ${escapeHtml(ev.sted||'')} · ${totalBrugere} brugere i alt`;
   } else {
     els.scopeBanner.style.display = 'none';
   }
@@ -1795,11 +1845,31 @@ function renderHeader(){
 function renderNavQuick(){
   const total = db.vaerested.length;
   const members = db.vaerested.filter(v=>v.medlem).length;
+  const deltaget = db.vaerested.filter(v => db.signups.some(s => s.vaerestedId === v.id)).length;
   els.nqAllCount.textContent = total;
   els.nqMemberCount.textContent = members;
   els.nqNonmemberCount.textContent = total - members;
+  if(els.nqSportCount) els.nqSportCount.textContent = deltaget;
   els.navQuick.querySelectorAll('.nav-quick-btn').forEach(btn => {
     btn.classList.toggle('active', btn.dataset.mode === viewMode);
+  });
+}
+
+function renderNavEvents(){
+  if(!els.navEvents) return;
+  const sorted = db.events.slice().sort((a,b) => new Date(b.tid||0) - new Date(a.tid||0));
+  els.navEvents.innerHTML = '';
+  if(sorted.length === 0){
+    els.navEvents.innerHTML = '<div class="empty-hint" style="padding:4px 8px;">Ingen begivenheder oprettet endnu.</div>';
+    return;
+  }
+  sorted.forEach(ev => {
+    const count = db.signups.filter(s => s.eventId === ev.id).length;
+    const item = document.createElement('div');
+    item.className = 'nav-kommune-item' + (viewMode==='event' && eventFilterId===ev.id ? ' active' : '');
+    item.innerHTML = `<span>🏅 ${escapeHtml(ev.navn)}</span><span class="nk-count">${count}</span>`;
+    item.addEventListener('click', () => selectEventFilter(ev.id));
+    els.navEvents.appendChild(item);
   });
 }
 
@@ -1846,6 +1916,7 @@ function renderNavTree(){
 }
 
 function renderList(){
+  const ev = viewMode === 'event' && eventFilterId ? db.events.find(e => e.id === eventFilterId) : null;
   const list = currentListVenues();
   els.listScroll.innerHTML = '';
   if(list.length === 0){
@@ -1859,7 +1930,11 @@ function renderList(){
             ? 'Ingen medlemmer registreret endnu.'
             : (viewMode === 'nonmembers'
               ? 'Ingen ikke-medlemmer registreret endnu.'
-              : 'Ingen væresteder oprettet endnu — opret det første.')))
+              : (viewMode === 'sport-all'
+                ? 'Ingen væresteder har deltaget i en sportsbegivenhed endnu.'
+                : (viewMode === 'event'
+                  ? 'Ingen væresteder tilmeldt denne begivenhed endnu.'
+                  : 'Ingen væresteder oprettet endnu — opret det første.')))))
       }</div>
     </div>`;
     return;
@@ -1867,6 +1942,7 @@ function renderList(){
   list.forEach(v => {
     const card = document.createElement('div');
     card.className = 'venue-card' + (v.medlem ? '' : ' nonmember');
+    const signup = ev ? db.signups.find(s => s.eventId === ev.id && s.vaerestedId === v.id) : null;
     card.innerHTML = `
       <div class="vc-top">
         <div class="vc-name">${escapeHtml(v.navn)}${v.note ? ' <span class=\"vc-note-flag\" title=\"Har en note\">📝</span>' : ''}</div>
@@ -1874,6 +1950,7 @@ function renderList(){
       </div>
       <div class="vc-meta">${escapeHtml(v.type || 'Type ikke angivet')} · ${escapeHtml(v.tilknytning || 'Ukendt tilknytning')}</div>
       ${(searchQuery) ? `<div class="vc-kommune">${escapeHtml(v.kommuneName||'')}</div>` : ''}
+      ${signup ? `<div class="vc-kommune">🏅 ${signup.antalBrugere} bruger${signup.antalBrugere===1?'':'e'} tilmeldt</div>` : ''}
     `;
     card.addEventListener('click', () => openVenueModal(v.id));
     els.listScroll.appendChild(card);
@@ -1891,6 +1968,7 @@ function renderAll(){
   renderList();
   renderNavQuick();
   renderNavTree();
+  renderNavEvents();
 }
 
 // ---------- SEARCH ----------

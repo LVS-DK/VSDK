@@ -586,6 +586,12 @@
     overflow-y:auto;
     box-shadow:0 20px 60px rgba(0,0,0,0.25);
   }
+  .modal.modal-wide{
+    max-width:860px;
+    overflow:hidden;
+    display:flex;
+    flex-direction:column;
+  }
   .modal-head{
     display:flex;
     justify-content:space-between;
@@ -606,6 +612,119 @@
   }
   .modal-close:hover{background:var(--line);}
   .modal-body{padding:20px 22px 22px 22px;}
+
+  /* SPORTSBEGIVENHEDER */
+  .sports-body{
+    display:flex;
+    padding:0;
+    min-height:0;
+    max-height:78vh;
+  }
+  .sports-list-pane{
+    flex:0 0 260px;
+    border-right:1px solid var(--line);
+    display:flex;
+    flex-direction:column;
+    padding:16px;
+    gap:12px;
+    overflow-y:auto;
+  }
+  .sports-event-list{
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+    overflow-y:auto;
+  }
+  .sports-event-item{
+    padding:10px 12px;
+    border-radius:8px;
+    cursor:pointer;
+    border:1px solid transparent;
+  }
+  .sports-event-item:hover{ background:var(--panel-2); }
+  .sports-event-item.active{
+    background:var(--select-glow);
+    border-color:var(--select);
+  }
+  .sports-event-item .se-name{ font-weight:600; font-size:13.5px; }
+  .sports-event-item .se-meta{ font-size:11.5px; color:var(--ink-soft); margin-top:2px; }
+  .sports-detail-pane{
+    flex:1;
+    padding:20px 24px;
+    overflow-y:auto;
+  }
+  .sd-head{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    gap:10px;
+    margin-bottom:4px;
+  }
+  .sd-head h3{ font-family:'Inter',sans-serif; font-size:18px; margin:0; }
+  .sd-actions{ display:flex; gap:6px; flex-shrink:0; }
+  .sd-actions button{
+    border:none; background:var(--panel-2); width:26px; height:26px; border-radius:50%;
+    cursor:pointer; font-size:12px; color:var(--ink-soft);
+  }
+  .sd-actions button:hover{ background:var(--line); }
+  .sd-meta{ font-size:13px; color:var(--ink-soft); margin-bottom:2px; }
+  .sd-noter{ font-size:13px; color:var(--ink); background:var(--panel); border-radius:8px; padding:10px 12px; margin:10px 0 4px 0; white-space:pre-wrap; }
+  .sd-section-title{
+    font-size:12.5px; font-weight:700; text-transform:uppercase; letter-spacing:.04em;
+    color:var(--ink-soft); margin:20px 0 8px 0;
+  }
+  .sd-kommune-grid{
+    display:flex; flex-wrap:wrap; gap:6px;
+  }
+  .sd-kommune-chip{
+    background:var(--panel); border-radius:20px; padding:5px 12px; font-size:12.5px;
+    display:flex; align-items:center; gap:6px;
+  }
+  .sd-kommune-chip .n{ font-weight:600; }
+  .sd-kommune-chip .c{ color:var(--ink-soft); font-family:'Inter',sans-serif; }
+  .sd-kommune-chip.origin{ background:var(--select-glow); border:1px solid var(--select); }
+  .signup-row{
+    display:flex; align-items:center; justify-content:space-between; gap:8px;
+    padding:9px 12px; background:var(--panel); border-radius:8px; margin-bottom:6px; font-size:13.5px;
+  }
+  .signup-row .sr-name{ font-weight:600; }
+  .signup-row .sr-kommune{ font-size:11.5px; color:var(--ink-soft); }
+  .signup-row .sr-count{
+    font-family:'Inter',sans-serif; font-weight:700; font-size:13px; color:var(--member);
+    background:var(--member-soft); border-radius:20px; padding:2px 10px; flex-shrink:0;
+  }
+  .signup-row .sr-remove{
+    border:none; background:var(--panel-2); width:22px; height:22px; border-radius:50%;
+    cursor:pointer; font-size:11px; color:var(--ink-soft); flex-shrink:0;
+  }
+  .venue-search-box{ position:relative; }
+  .venue-search-results{
+    position:absolute; left:0; right:0; top:100%;
+    background:var(--paper); border:1px solid var(--line); border-radius:8px;
+    box-shadow:var(--shadow); max-height:180px; overflow-y:auto; z-index:10; margin-top:3px;
+  }
+  .venue-search-results .vsr-item{ padding:8px 12px; cursor:pointer; font-size:13px; }
+  .venue-search-results .vsr-item:hover{ background:var(--panel-2); }
+  .selected-venue-pill{
+    display:inline-flex; align-items:center; gap:8px; background:var(--select-glow);
+    border:1px solid var(--select); border-radius:20px; padding:5px 12px; font-size:13px; margin-top:6px;
+  }
+  .venue-events-btn{ width:100%; margin-bottom:14px; justify-content:center; }
+  .venue-event-card{
+    padding:11px 13px; background:var(--panel); border-radius:8px; margin-bottom:8px;
+  }
+  .venue-event-card .vec-name{ font-weight:600; font-size:14px; }
+  .venue-event-card .vec-meta{ font-size:12px; color:var(--ink-soft); margin-top:3px; }
+  .venue-event-card .vec-count{
+    display:inline-block; margin-top:6px; font-size:12px; font-weight:700; color:var(--member);
+    background:var(--member-soft); border-radius:20px; padding:2px 10px;
+  }
+
+  @media (max-width: 700px){
+    .modal.modal-wide{ max-width:94vw; }
+    .sports-body{ flex-direction:column; max-height:82vh; }
+    .sports-list-pane{ flex:0 0 auto; max-height:180px; border-right:none; border-bottom:1px solid var(--line); }
+  }
   .field{margin-bottom:14px;}
   .field label{
     display:block;
@@ -841,6 +960,7 @@
     </div>
     <div class="topbar-spacer"></div>
     <span class="superuser-badge" id="superuserBadge">⚡ Superbruger</span>
+    <button class="btn btn-ghost" id="openSportsBtn">🏅 Sportsbegivenheder</button>
     <button class="btn btn-primary" id="newVenueBtn">+ Nyt værested</button>
   </div>
 
@@ -990,6 +1110,8 @@
         </div>
       </div>
 
+      <button class="btn btn-ghost venue-events-btn" id="showVenueEventsBtn" style="display:none;">🏅 Se sportsbegivenheder</button>
+
       <div class="modal-footer">
         <button class="btn btn-danger" id="deleteVenueBtn" style="display:none;">Slet</button>
         <button class="btn btn-primary" id="saveVenueBtn">Gem værested</button>
@@ -1055,6 +1177,38 @@
   </div>
 </div>
 
+<!-- SPORTSBEGIVENHEDER MODAL -->
+<div class="overlay" id="sportsOverlay">
+  <div class="modal modal-wide">
+    <div class="modal-head">
+      <h2>🏅 Sportsbegivenheder</h2>
+      <button class="modal-close" id="sportsModalClose">✕</button>
+    </div>
+    <div class="modal-body sports-body">
+      <div class="sports-list-pane">
+        <button class="btn btn-primary" id="newEventBtn">+ Ny begivenhed</button>
+        <div class="sports-event-list" id="sportsEventList"></div>
+      </div>
+      <div class="sports-detail-pane" id="sportsDetailPane">
+        <div class="empty-hint">Vælg en begivenhed i listen, eller opret en ny.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- VÆRESTEDETS SPORTSBEGIVENHEDER (fra produktarket) -->
+<div class="overlay" id="venueEventsOverlay">
+  <div class="modal">
+    <div class="modal-head">
+      <h2 id="venueEventsTitle">Sportsbegivenheder</h2>
+      <button class="modal-close" id="venueEventsClose">✕</button>
+    </div>
+    <div class="modal-body">
+      <div id="venueEventsList"></div>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -1071,7 +1225,7 @@ const SUPABASE_URL = 'https://bmfnsqlhvosbbcdsexko.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJtZm5zcWxodm9zYmJjZHNleGtvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM5OTc5NzAsImV4cCI6MjA5OTU3Mzk3MH0.PRk6J3rHIp1l1JSi4Vx3dVgfDxSDysrVHpvYMx7jj4E';
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-let db = { vaerested: [], kommuneInfo: {}, tilknytninger: DEFAULT_TILKNYTNINGER.slice() };
+let db = { vaerested: [], kommuneInfo: {}, tilknytninger: DEFAULT_TILKNYTNINGER.slice(), events: [], signups: [] };
 let selectedKommune = null; // {code, name}
 let editingVenueId = null;
 let searchQuery = "";
@@ -1087,6 +1241,8 @@ const els = {};
  "f_navn","f_adresse","f_kommune","f_telefon","f_email","f_type","f_tilknytning","f_note",
  "tagManager","newTagInput","addTagBtn","deleteVenueBtn","saveVenueBtn",
  "kommuneOverlay","kommuneModalTitle","kommuneModalClose",
+ "openSportsBtn","sportsOverlay","sportsModalClose","sportsEventList","sportsDetailPane","newEventBtn",
+ "showVenueEventsBtn","venueEventsOverlay","venueEventsTitle","venueEventsClose","venueEventsList",
  "byraadList","addByraadBtn","byraadForm","bf_navn","bf_borgmester","bf_socialudvalg","byraadCancelBtn","byraadSaveBtn",
  "medierSection","medieList","addMedieBtn","medieForm","mf_navn","mf_note","medieCancelBtn","medieSaveBtn",
  "toast"
@@ -1123,16 +1279,50 @@ function venueToRow(v){
   };
 }
 
+function rowToEvent(r){
+  return {
+    id: r.id,
+    navn: r.navn,
+    sted: r.sted || '',
+    kommuneCode: r.kommune_code || '',
+    kommuneName: r.kommune_navn || '',
+    tid: r.tid || '',
+    noter: r.noter || ''
+  };
+}
+function eventToRow(e){
+  return {
+    navn: e.navn,
+    sted: e.sted,
+    kommune_code: e.kommuneCode || null,
+    kommune_navn: e.kommuneName || null,
+    tid: e.tid || null,
+    noter: e.noter
+  };
+}
+function rowToSignup(r){
+  return {
+    id: r.id,
+    eventId: r.event_id,
+    vaerestedId: r.vaerested_id,
+    antalBrugere: r.antal_brugere || 0
+  };
+}
+
 async function loadDB(){
   try{
-    const [venuesRes, kommuneRes, tagsRes] = await Promise.all([
+    const [venuesRes, kommuneRes, tagsRes, eventsRes, signupsRes] = await Promise.all([
       sb.from('vaeresteder').select('*'),
       sb.from('kommune_info').select('*'),
-      sb.from('tilknytninger').select('navn')
+      sb.from('tilknytninger').select('navn'),
+      sb.from('sportsbegivenheder').select('*'),
+      sb.from('tilmeldinger').select('*')
     ]);
     if(venuesRes.error) throw venuesRes.error;
     if(kommuneRes.error) throw kommuneRes.error;
     if(tagsRes.error) throw tagsRes.error;
+    if(eventsRes.error) throw eventsRes.error;
+    if(signupsRes.error) throw signupsRes.error;
 
     db.vaerested = (venuesRes.data || []).map(rowToVenue);
 
@@ -1148,6 +1338,9 @@ async function loadDB(){
       db.tilknytninger = DEFAULT_TILKNYTNINGER.slice();
       await sb.from('tilknytninger').insert(DEFAULT_TILKNYTNINGER.map(navn => ({ navn })));
     }
+
+    db.events = (eventsRes.data || []).map(rowToEvent);
+    db.signups = (signupsRes.data || []).map(rowToSignup);
   }catch(e){
     console.error('Kunne ikke hente data fra Supabase', e);
     showToast('Kunne ikke forbinde til databasen — tjek forbindelsen og genindlæs siden');
@@ -1161,6 +1354,8 @@ function subscribeRealtime(){
     .on('postgres_changes', { event: '*', schema: 'public', table: 'vaeresteder' }, () => { loadDB(); })
     .on('postgres_changes', { event: '*', schema: 'public', table: 'kommune_info' }, () => { loadDB(); })
     .on('postgres_changes', { event: '*', schema: 'public', table: 'tilknytninger' }, () => { loadDB(); })
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'sportsbegivenheder' }, () => { loadDB(); })
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'tilmeldinger' }, () => { loadDB(); })
     .subscribe();
 }
 
@@ -1672,6 +1867,7 @@ function openVenueModal(id){
   const v = id ? db.vaerested.find(x=>x.id===id) : null;
   els.venueModalTitle.textContent = v ? 'Rediger værested' : 'Nyt værested';
   els.deleteVenueBtn.style.display = v ? 'block' : 'none';
+  els.showVenueEventsBtn.style.display = v ? 'flex' : 'none';
   populateKommuneSelect();
   populateTilknytningSelect();
   renderTagManager();
@@ -1925,6 +2121,338 @@ els.medieSaveBtn.addEventListener('click', async () => {
     showToast('Medie gemt');
   }
 });
+
+// ---------- SPORTSBEGIVENHEDER ----------
+let selectedEventId = null;
+let editingEventId = null;
+let signupSelectedVenue = null; // {id, navn, kommuneName}
+
+function formatEventTid(tid){
+  if(!tid) return 'Tidspunkt ikke angivet';
+  const d = new Date(tid);
+  if(isNaN(d.getTime())) return tid;
+  return d.toLocaleString('da-DK', { day:'numeric', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' });
+}
+function formatEventTidShort(tid){
+  if(!tid) return 'Ingen dato';
+  const d = new Date(tid);
+  if(isNaN(d.getTime())) return tid;
+  return d.toLocaleDateString('da-DK', { day:'numeric', month:'short', year:'numeric' });
+}
+
+function openSportsModal(){
+  selectedEventId = null;
+  editingEventId = null;
+  renderSportsEventList();
+  els.sportsDetailPane.innerHTML = '<div class="empty-hint">Vælg en begivenhed i listen, eller opret en ny.</div>';
+  els.sportsOverlay.classList.add('open');
+}
+els.openSportsBtn.addEventListener('click', openSportsModal);
+els.sportsModalClose.addEventListener('click', () => els.sportsOverlay.classList.remove('open'));
+els.sportsOverlay.addEventListener('click', (e) => { if(e.target === els.sportsOverlay) els.sportsOverlay.classList.remove('open'); });
+
+function renderSportsEventList(){
+  const list = db.events.slice().sort((a,b) => {
+    if(a.tid && b.tid) return new Date(b.tid) - new Date(a.tid);
+    if(a.tid) return -1;
+    if(b.tid) return 1;
+    return a.navn.localeCompare(b.navn, 'da');
+  });
+  els.sportsEventList.innerHTML = '';
+  if(list.length === 0){
+    els.sportsEventList.innerHTML = '<div class="empty-hint">Ingen begivenheder oprettet endnu.</div>';
+    return;
+  }
+  list.forEach(ev => {
+    const item = document.createElement('div');
+    item.className = 'sports-event-item' + (selectedEventId === ev.id ? ' active' : '');
+    const signupCount = db.signups.filter(s => s.eventId === ev.id).length;
+    item.innerHTML = `
+      <div class="se-name">${escapeHtml(ev.navn)}</div>
+      <div class="se-meta">${escapeHtml(formatEventTidShort(ev.tid))} · ${signupCount} værested${signupCount===1?'':'er'}</div>
+    `;
+    item.addEventListener('click', () => selectEvent(ev.id));
+    els.sportsEventList.appendChild(item);
+  });
+}
+
+function selectEvent(id){
+  selectedEventId = id;
+  editingEventId = null;
+  renderSportsEventList();
+  renderEventDetail();
+}
+
+function renderEventDetail(){
+  const ev = db.events.find(e => e.id === selectedEventId);
+  if(!ev){
+    els.sportsDetailPane.innerHTML = '<div class="empty-hint">Vælg en begivenhed i listen, eller opret en ny.</div>';
+    return;
+  }
+  const signups = db.signups.filter(s => s.eventId === ev.id);
+
+  // Aggregér kommuner blandt tilmeldte væresteder
+  const kommuneAgg = {};
+  signups.forEach(s => {
+    const v = db.vaerested.find(x => x.id === s.vaerestedId);
+    if(!v) return;
+    const key = v.kommuneCode || '—';
+    if(!kommuneAgg[key]) kommuneAgg[key] = { navn: v.kommuneName || 'Ukendt', antal: 0, brugere: 0 };
+    kommuneAgg[key].antal += 1;
+    kommuneAgg[key].brugere += (signups.find(x=>x.vaerestedId===v.id)?.antalBrugere || 0);
+  });
+  const kommuneList = Object.entries(kommuneAgg).sort((a,b) => b[1].antal - a[1].antal);
+
+  els.sportsDetailPane.innerHTML = `
+    <div class="sd-head">
+      <h3>${escapeHtml(ev.navn)}</h3>
+      <div class="sd-actions">
+        <button id="sdEditBtn" title="Redigér">✎</button>
+        <button id="sdDeleteBtn" title="Slet">✕</button>
+      </div>
+    </div>
+    <div class="sd-meta">📍 ${escapeHtml(ev.sted || 'Sted ikke angivet')}${ev.kommuneName ? ' · ' + escapeHtml(ev.kommuneName) + ' Kommune' : ''}</div>
+    <div class="sd-meta">🕒 ${escapeHtml(formatEventTid(ev.tid))}</div>
+    ${ev.noter ? `<div class="sd-noter">${escapeHtml(ev.noter)}</div>` : ''}
+
+    <div class="sd-section-title">Kommuner repræsenteret</div>
+    <div class="sd-kommune-grid" id="sdKommuneGrid"></div>
+
+    <div class="sd-section-title">Tilmeldte væresteder (${signups.length})</div>
+    <div id="sdSignupList"></div>
+
+    <div class="sd-section-title">Tilmeld værested</div>
+    <div class="venue-search-box">
+      <input type="text" id="signupVenueSearch" placeholder="Søg efter værested…" autocomplete="off">
+      <div class="venue-search-results" id="signupVenueResults" style="display:none;"></div>
+    </div>
+    <div id="signupSelectedBox"></div>
+  `;
+
+  // Kommune-grid
+  const grid = document.getElementById('sdKommuneGrid');
+  if(kommuneList.length === 0){
+    grid.innerHTML = '<div class="empty-hint">Ingen tilmeldte væresteder endnu.</div>';
+  } else {
+    grid.innerHTML = kommuneList.map(([code, info]) =>
+      `<div class="sd-kommune-chip${code===ev.kommuneCode ? ' origin' : ''}"><span class="n">${escapeHtml(info.navn)}</span><span class="c">${info.antal} værested${info.antal===1?'':'er'} · ${info.brugere} brugere</span></div>`
+    ).join('');
+  }
+  if(ev.kommuneCode && !kommuneAgg[ev.kommuneCode]){
+    grid.innerHTML += `<div class="sd-kommune-chip origin"><span class="n">${escapeHtml(ev.kommuneName)}</span><span class="c">afholdes her</span></div>`;
+  }
+
+  // Tilmeldte-liste
+  const signupListEl = document.getElementById('sdSignupList');
+  if(signups.length === 0){
+    signupListEl.innerHTML = '<div class="empty-hint">Ingen væresteder tilmeldt endnu.</div>';
+  } else {
+    signupListEl.innerHTML = '';
+    signups.slice().sort((a,b) => {
+      const va = db.vaerested.find(x=>x.id===a.vaerestedId);
+      const vb = db.vaerested.find(x=>x.id===b.vaerestedId);
+      return (va?.navn||'').localeCompare(vb?.navn||'', 'da');
+    }).forEach(s => {
+      const v = db.vaerested.find(x => x.id === s.vaerestedId);
+      const row = document.createElement('div');
+      row.className = 'signup-row';
+      row.innerHTML = `
+        <div>
+          <div class="sr-name">${escapeHtml(v ? v.navn : 'Ukendt værested')}</div>
+          <div class="sr-kommune">${escapeHtml(v ? v.kommuneName : '')}</div>
+        </div>
+        <div class="sr-count">${s.antalBrugere} bruger${s.antalBrugere===1?'':'e'}</div>
+        <button class="sr-remove" title="Fjern tilmelding">✕</button>
+      `;
+      row.querySelector('.sr-remove').addEventListener('click', () => removeSignup(s.id));
+      signupListEl.appendChild(row);
+    });
+  }
+
+  document.getElementById('sdEditBtn').addEventListener('click', () => openEventForm(ev));
+  document.getElementById('sdDeleteBtn').addEventListener('click', () => deleteEvent(ev.id));
+
+  signupSelectedVenue = null;
+  const searchInput = document.getElementById('signupVenueSearch');
+  const resultsBox = document.getElementById('signupVenueResults');
+  searchInput.addEventListener('input', () => {
+    const q = searchInput.value.trim().toLowerCase();
+    if(!q){ resultsBox.style.display = 'none'; resultsBox.innerHTML=''; return; }
+    const already = new Set(signups.map(s => s.vaerestedId));
+    const matches = db.vaerested.filter(v => v.navn.toLowerCase().includes(q) && !already.has(v.id)).slice(0, 8);
+    if(matches.length === 0){
+      resultsBox.innerHTML = '<div class="vsr-item">Ingen match</div>';
+    } else {
+      resultsBox.innerHTML = matches.map(v => `<div class="vsr-item" data-id="${v.id}">${escapeHtml(v.navn)} <span style="color:var(--ink-soft)">· ${escapeHtml(v.kommuneName)}</span></div>`).join('');
+      resultsBox.querySelectorAll('.vsr-item').forEach(el => {
+        el.addEventListener('click', () => {
+          const v = db.vaerested.find(x => x.id === el.dataset.id);
+          signupSelectedVenue = v;
+          resultsBox.style.display = 'none';
+          searchInput.value = '';
+          renderSelectedVenueBox();
+        });
+      });
+    }
+    resultsBox.style.display = 'block';
+  });
+  renderSelectedVenueBox();
+}
+
+function renderSelectedVenueBox(){
+  const box = document.getElementById('signupSelectedBox');
+  if(!box) return;
+  if(!signupSelectedVenue){
+    box.innerHTML = '';
+    return;
+  }
+  box.innerHTML = `
+    <div class="selected-venue-pill">
+      <span>${escapeHtml(signupSelectedVenue.navn)}</span>
+      <button id="clearSignupVenue" style="border:none;background:none;cursor:pointer;color:var(--ink-soft);">✕</button>
+    </div>
+    <div class="field" style="margin-top:10px;max-width:160px;">
+      <label for="signupAntal">Antal brugere</label>
+      <input type="number" id="signupAntal" min="0" value="1">
+    </div>
+    <button class="btn btn-primary btn-sm" id="signupConfirmBtn">Tilmeld</button>
+  `;
+  document.getElementById('clearSignupVenue').addEventListener('click', () => {
+    signupSelectedVenue = null;
+    renderSelectedVenueBox();
+  });
+  document.getElementById('signupConfirmBtn').addEventListener('click', addSignup);
+}
+
+async function addSignup(){
+  if(!signupSelectedVenue || !selectedEventId) return;
+  const antal = parseInt(document.getElementById('signupAntal').value, 10) || 0;
+  const { error } = await sb.from('tilmeldinger').upsert({
+    event_id: selectedEventId,
+    vaerested_id: signupSelectedVenue.id,
+    antal_brugere: antal
+  }, { onConflict: 'event_id,vaerested_id' });
+  if(error){ showToast('Kunne ikke tilmelde værested'); console.error(error); return; }
+  await loadDB();
+  selectEvent(selectedEventId);
+  showToast('Værested tilmeldt');
+}
+
+async function removeSignup(id){
+  if(!confirm('Fjern denne tilmelding?')) return;
+  const { error } = await sb.from('tilmeldinger').delete().eq('id', id);
+  if(error){ showToast('Kunne ikke fjerne tilmelding'); console.error(error); return; }
+  await loadDB();
+  selectEvent(selectedEventId);
+}
+
+function openEventForm(ev){
+  editingEventId = ev ? ev.id : null;
+  const sorted = MAP_DATA.municipalities.slice().sort((a,b)=>a.name.localeCompare(b.name,'da'));
+  const kommuneOptions = `<option value="">Vælg kommune…</option>` + sorted.map(m => `<option value="${m.code}" ${ev && ev.kommuneCode===m.code ? 'selected' : ''}>${m.name}</option>`).join('');
+  const tidValue = ev && ev.tid ? new Date(ev.tid).toISOString().slice(0,16) : '';
+
+  els.sportsDetailPane.innerHTML = `
+    <h3 style="margin:0 0 14px 0;">${ev ? 'Redigér begivenhed' : 'Ny begivenhed'}</h3>
+    <div class="field">
+      <label for="ef_navn">Navn</label>
+      <input type="text" id="ef_navn" placeholder="F.eks. Sport for Livet" value="${ev ? escapeHtml(ev.navn) : ''}">
+    </div>
+    <div class="field">
+      <label for="ef_sted">Sted</label>
+      <input type="text" id="ef_sted" placeholder="F.eks. Idrætscenter Vest" value="${ev ? escapeHtml(ev.sted) : ''}">
+    </div>
+    <div class="field">
+      <label for="ef_kommune">Kommune</label>
+      <select id="ef_kommune">${kommuneOptions}</select>
+    </div>
+    <div class="field">
+      <label for="ef_tid">Tid</label>
+      <input type="datetime-local" id="ef_tid" value="${tidValue}">
+    </div>
+    <div class="field">
+      <label for="ef_noter">Noter</label>
+      <textarea id="ef_noter" placeholder="Praktiske noter...">${ev ? escapeHtml(ev.noter) : ''}</textarea>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" id="efCancelBtn">Annullér</button>
+      <button class="btn btn-primary" id="efSaveBtn">Gem begivenhed</button>
+    </div>
+  `;
+  document.getElementById('efCancelBtn').addEventListener('click', () => {
+    if(editingEventId) renderEventDetail();
+    else { selectedEventId = null; els.sportsDetailPane.innerHTML = '<div class="empty-hint">Vælg en begivenhed i listen, eller opret en ny.</div>'; }
+  });
+  document.getElementById('efSaveBtn').addEventListener('click', saveEventForm);
+}
+els.newEventBtn.addEventListener('click', () => { selectedEventId = null; renderSportsEventList(); openEventForm(null); });
+
+async function saveEventForm(){
+  const navn = document.getElementById('ef_navn').value.trim();
+  if(!navn){ showToast('Begivenheden skal have et navn'); return; }
+  const kommuneCode = document.getElementById('ef_kommune').value;
+  const kommuneObj = MAP_DATA.municipalities.find(m => m.code === kommuneCode);
+  const tidRaw = document.getElementById('ef_tid').value;
+  const payload = {
+    navn,
+    sted: document.getElementById('ef_sted').value.trim(),
+    kommuneCode: kommuneCode || '',
+    kommuneName: kommuneObj ? kommuneObj.name : '',
+    tid: tidRaw ? new Date(tidRaw).toISOString() : '',
+    noter: document.getElementById('ef_noter').value.trim()
+  };
+  const row = eventToRow(payload);
+  if(editingEventId){
+    const { error } = await sb.from('sportsbegivenheder').update(row).eq('id', editingEventId);
+    if(error){ showToast('Kunne ikke gemme begivenhed'); console.error(error); return; }
+  } else {
+    const { data, error } = await sb.from('sportsbegivenheder').insert(row).select().single();
+    if(error){ showToast('Kunne ikke oprette begivenhed'); console.error(error); return; }
+    editingEventId = data.id;
+  }
+  await loadDB();
+  selectEvent(editingEventId);
+  showToast('Begivenhed gemt');
+}
+
+async function deleteEvent(id){
+  const ev = db.events.find(e => e.id === id);
+  if(!confirm(`Slet begivenheden "${ev ? ev.navn : ''}"? Alle tilmeldinger fjernes samtidig.`)) return;
+  const { error } = await sb.from('sportsbegivenheder').delete().eq('id', id);
+  if(error){ showToast('Kunne ikke slette begivenhed'); console.error(error); return; }
+  selectedEventId = null;
+  await loadDB();
+  renderSportsEventList();
+  els.sportsDetailPane.innerHTML = '<div class="empty-hint">Vælg en begivenhed i listen, eller opret en ny.</div>';
+  showToast('Begivenhed slettet');
+}
+
+// ---------- VÆRESTEDETS SPORTSBEGIVENHEDER ----------
+function openVenueEventsModal(venueId){
+  const v = db.vaerested.find(x => x.id === venueId);
+  if(!v) return;
+  els.venueEventsTitle.textContent = v.navn + ' — Sportsbegivenheder';
+  const mySignups = db.signups.filter(s => s.vaerestedId === venueId);
+  if(mySignups.length === 0){
+    els.venueEventsList.innerHTML = '<div class="empty-hint">Dette værested har ikke deltaget i nogen sportsbegivenheder endnu.</div>';
+  } else {
+    els.venueEventsList.innerHTML = mySignups
+      .map(s => ({ s, ev: db.events.find(e => e.id === s.eventId) }))
+      .filter(x => x.ev)
+      .sort((a,b) => new Date(b.ev.tid||0) - new Date(a.ev.tid||0))
+      .map(({s, ev}) => `
+        <div class="venue-event-card">
+          <div class="vec-name">${escapeHtml(ev.navn)}</div>
+          <div class="vec-meta">📍 ${escapeHtml(ev.sted || 'Sted ikke angivet')} · 🕒 ${escapeHtml(formatEventTid(ev.tid))}</div>
+          <div class="vec-count">${s.antalBrugere} bruger${s.antalBrugere===1?'':'e'} tilmeldt</div>
+        </div>
+      `).join('');
+  }
+  els.venueEventsOverlay.classList.add('open');
+}
+els.showVenueEventsBtn.addEventListener('click', () => { if(editingVenueId) openVenueEventsModal(editingVenueId); });
+els.venueEventsClose.addEventListener('click', () => els.venueEventsOverlay.classList.remove('open'));
+els.venueEventsOverlay.addEventListener('click', (e) => { if(e.target === els.venueEventsOverlay) els.venueEventsOverlay.classList.remove('open'); });
 
 // ---------- INIT ----------
 initMapZoomPan();

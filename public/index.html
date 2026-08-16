@@ -150,6 +150,13 @@
   }
   .btn-ghost:hover{background:var(--panel-2);}
   .btn-sm{padding:6px 12px;font-size:13px;}
+  .btn-icon-only{
+    padding:9px 11px;
+    font-size:15px;
+    line-height:1;
+  }
+  .btn-icon-only.spinning{ animation:spin 0.7s linear; }
+  @keyframes spin{ from{transform:rotate(0deg);} to{transform:rotate(360deg);} }
 
   /* MAIN LAYOUT */
   .main{
@@ -352,6 +359,37 @@
     text-anchor:middle;
     pointer-events:none;
     user-select:none;
+  }
+  .map-mode-switch{
+    position:absolute;
+    left:18px;
+    top:18px;
+    background:var(--paper);
+    border-radius:8px;
+    box-shadow:var(--shadow);
+    padding:7px 10px;
+    display:flex;
+    flex-direction:column;
+    gap:3px;
+    z-index:10;
+  }
+  .map-mode-switch label{
+    font-size:10px;
+    text-transform:uppercase;
+    letter-spacing:.05em;
+    color:var(--ink-soft);
+    font-weight:700;
+  }
+  .map-mode-switch select{
+    border:1px solid var(--line);
+    border-radius:6px;
+    padding:5px 7px;
+    font-family:'Inter',sans-serif;
+    font-size:12.5px;
+    color:var(--ink);
+    background:var(--panel);
+    cursor:pointer;
+    max-width:210px;
   }
   .zoom-controls{
     position:absolute;
@@ -599,7 +637,10 @@
     padding:18px 22px;
     border-bottom:1px solid var(--line);
     position:sticky;top:0;background:var(--paper);
+    transition:background .15s;
   }
+  .modal-head.kontingent-paid{ background:var(--member-soft); border-bottom-color:var(--member); }
+  .modal-head.kontingent-unpaid{ background:var(--nonmember-soft); border-bottom-color:var(--nonmember); }
   .modal-head h2{
     font-family:'Inter',sans-serif;
     font-size:19px;
@@ -960,6 +1001,7 @@
     </div>
     <div class="topbar-spacer"></div>
     <span class="superuser-badge" id="superuserBadge">⚡ Superbruger</span>
+    <button class="btn btn-ghost btn-icon-only" id="refreshBtn" title="Genopfrisk forbindelse til Supabase">🔄</button>
     <button class="btn btn-ghost" id="openSportsBtn">🏅 Sportsbegivenheder</button>
     <button class="btn btn-primary" id="newVenueBtn">+ Nyt værested</button>
   </div>
@@ -1003,6 +1045,14 @@
         </g>
       </svg>
       <div class="map-tooltip" id="mapTooltip"><div class="t-name"></div><div class="t-sub"></div></div>
+      <div class="map-mode-switch">
+        <label for="mapModeSelect">Kortvisning</label>
+        <select id="mapModeSelect">
+          <option value="medlem">Medlem / Ikke medlem</option>
+          <option value="sport">Deltaget i sport / Ikke deltaget</option>
+          <option value="kontingent">Kontingent betalt / Ikke betalt</option>
+        </select>
+      </div>
       <div class="zoom-controls">
         <button id="zoomInBtn" title="Zoom ind">+</button>
         <button id="zoomOutBtn" title="Zoom ud">−</button>
@@ -1012,7 +1062,7 @@
         <span class="legend-empty"></span> Ingen registreret
         <span style="margin-left:6px;">·</span>
         <span class="legend-bar"></span>
-        <span>Ikke-medlem → Medlem (andel)</span>
+        <span id="legendModeText">Ikke-medlem → Medlem (andel)</span>
       </div>
     </div>
 
@@ -1052,7 +1102,7 @@
 <!-- PRODUKTARK MODAL -->
 <div class="overlay" id="venueOverlay">
   <div class="modal">
-    <div class="modal-head">
+    <div class="modal-head" id="venueModalHead">
       <h2 id="venueModalTitle">Nyt værested</h2>
       <button class="modal-close" id="venueModalClose">✕</button>
     </div>
@@ -1063,6 +1113,16 @@
         </div>
         <label class="switch">
           <input type="checkbox" id="memberToggle">
+          <span class="switch-track"></span>
+        </label>
+      </div>
+
+      <div class="toggle-row kontingent-row" id="kontingentToggleRow" style="display:none;">
+        <div class="toggle-label" id="kontingentStatusLabel">Kontingent ikke betalt
+          <span class="sub">Angiv om årets kontingent er betalt</span>
+        </div>
+        <label class="switch switch-kontingent">
+          <input type="checkbox" id="kontingentToggle">
           <span class="switch-track"></span>
         </label>
       </div>
@@ -1234,14 +1294,15 @@ let expandedRegions = new Set();
 
 const els = {};
 ["navQuick","navTree","nqAllCount","nqMemberCount","nqNonmemberCount",
- "zoomInBtn","zoomOutBtn","zoomResetBtn","insetFrame","insetFrameTop","insetTitle","insetToggleBtn",
+ "zoomInBtn","zoomOutBtn","zoomResetBtn","mapModeSelect","legendModeText","insetFrame","insetFrameTop","insetTitle","insetToggleBtn",
  "searchInput","searchClear","newVenueBtn","dkMap","mapTooltip","statTotal","statMember","statNonmember",
  "shName","shClearBtn","shCount","shActions","byraadBtn","listScroll","scopeBanner",
- "venueOverlay","venueModalTitle","venueModalClose","toggleStatusLabel","memberToggle",
+ "venueOverlay","venueModalTitle","venueModalClose","venueModalHead","toggleStatusLabel","memberToggle",
+ "kontingentToggleRow","kontingentStatusLabel","kontingentToggle",
  "f_navn","f_adresse","f_kommune","f_telefon","f_email","f_type","f_tilknytning","f_note",
  "tagManager","newTagInput","addTagBtn","deleteVenueBtn","saveVenueBtn",
  "kommuneOverlay","kommuneModalTitle","kommuneModalClose",
- "openSportsBtn","sportsOverlay","sportsModalClose","sportsEventList","sportsDetailPane","newEventBtn",
+ "openSportsBtn","refreshBtn","sportsOverlay","sportsModalClose","sportsEventList","sportsDetailPane","newEventBtn",
  "showVenueEventsBtn","venueEventsOverlay","venueEventsTitle","venueEventsClose","venueEventsList",
  "byraadList","addByraadBtn","byraadForm","bf_navn","bf_borgmester","bf_socialudvalg","byraadCancelBtn","byraadSaveBtn",
  "medierSection","medieList","addMedieBtn","medieForm","mf_navn","mf_note","medieCancelBtn","medieSaveBtn",
@@ -1261,7 +1322,8 @@ function rowToVenue(r){
     type: r.type || '',
     tilknytning: r.tilknytning || '',
     medlem: !!r.medlem,
-    note: r.note || ''
+    note: r.note || '',
+    kontingentBetalt: !!r.kontingent_betalt
   };
 }
 function venueToRow(v){
@@ -1275,7 +1337,8 @@ function venueToRow(v){
     type: v.type,
     tilknytning: v.tilknytning,
     medlem: v.medlem,
-    note: v.note || ''
+    note: v.note || '',
+    kontingent_betalt: v.kontingentBetalt || false
   };
 }
 
@@ -1369,18 +1432,41 @@ function showToast(msg){
 function uid(){ return 'v_' + Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
 
 // ---------- MAP RENDER ----------
+let mapColorMode = 'medlem'; // 'medlem' | 'sport' | 'kontingent'
+
 function kommuneStats(code){
   const vs = db.vaerested.filter(v => v.kommuneCode === code);
   const members = vs.filter(v => v.medlem).length;
-  return { total: vs.length, members, nonmembers: vs.length - members };
+  const deltaget = vs.filter(v => db.signups.some(s => s.vaerestedId === v.id)).length;
+  const medlemmer = vs.filter(v => v.medlem);
+  const betalt = medlemmer.filter(v => v.kontingentBetalt).length;
+  return {
+    total: vs.length,
+    members,
+    nonmembers: vs.length - members,
+    deltaget,
+    ikkeDeltaget: vs.length - deltaget,
+    medlemmerTotal: medlemmer.length,
+    betalt,
+    ikkeBetalt: medlemmer.length - betalt
+  };
 }
 
 function colorForKommune(code){
   const s = kommuneStats(code);
-  if(s.total === 0) return 'var(--map-empty)';
-  const ratio = s.members / s.total;
-  // interpolate nonmember (#BF5B2E) -> member (#2F6B4F)
-  const c1 = [0xBF,0x5B,0x2E], c2 = [0x2F,0x6B,0x4F];
+  const c1 = [0xBF,0x5B,0x2E], c2 = [0x2F,0x6B,0x4F]; // nonmember-farve -> member-farve
+  let ratio, total;
+  if(mapColorMode === 'sport'){
+    total = s.total;
+    ratio = total > 0 ? s.deltaget / total : 0;
+  } else if(mapColorMode === 'kontingent'){
+    total = s.medlemmerTotal;
+    ratio = total > 0 ? s.betalt / total : 0;
+  } else {
+    total = s.total;
+    ratio = total > 0 ? s.members / total : 0;
+  }
+  if(total === 0) return 'var(--map-empty)';
   const mix = c1.map((c,i)=>Math.round(c + (c2[i]-c)*ratio));
   return `rgb(${mix[0]},${mix[1]},${mix[2]})`;
 }
@@ -1477,9 +1563,19 @@ function showMapTooltip(e, m){
   els.mapTooltip.style.left = (e.clientX - rect.left) + 'px';
   els.mapTooltip.style.top = (e.clientY - rect.top) + 'px';
   els.mapTooltip.querySelector('.t-name').textContent = m.name;
-  els.mapTooltip.querySelector('.t-sub').textContent = s.total === 0
-    ? 'Ingen registrerede væresteder'
-    : `${s.total} værested${s.total===1?'':'er'} · ${s.members} medlem · ${s.nonmembers} ikke medlem`;
+  let subText;
+  if(s.total === 0){
+    subText = 'Ingen registrerede væresteder';
+  } else if(mapColorMode === 'sport'){
+    subText = `${s.total} værested${s.total===1?'':'er'} · ${s.deltaget} deltaget · ${s.ikkeDeltaget} ikke deltaget`;
+  } else if(mapColorMode === 'kontingent'){
+    subText = s.medlemmerTotal === 0
+      ? `${s.total} værested${s.total===1?'':'er'} · ingen medlemmer`
+      : `${s.medlemmerTotal} medlem${s.medlemmerTotal===1?'':'mer'} · ${s.betalt} betalt · ${s.ikkeBetalt} ikke betalt`;
+  } else {
+    subText = `${s.total} værested${s.total===1?'':'er'} · ${s.members} medlem · ${s.nonmembers} ikke medlem`;
+  }
+  els.mapTooltip.querySelector('.t-sub').textContent = subText;
   els.mapTooltip.style.opacity = 1;
 }
 function hideMapTooltip(){ els.mapTooltip.style.opacity = 0; }
@@ -1887,7 +1983,11 @@ function openVenueModal(id){
   }
   els.f_tilknytning.value = v ? v.tilknytning : db.tilknytninger[0];
   els.memberToggle.checked = v ? !!v.medlem : true;
+  els.kontingentToggle.checked = v ? !!v.kontingentBetalt : false;
   updateToggleLabel();
+  updateKontingentVisibility();
+  updateKontingentLabel();
+  updateModalHeadColor();
 
   els.venueOverlay.classList.add('open');
 }
@@ -1896,7 +1996,27 @@ function closeVenueModal(){ els.venueOverlay.classList.remove('open'); editingVe
 function updateToggleLabel(){
   els.toggleStatusLabel.childNodes[0].textContent = els.memberToggle.checked ? 'Medlem' : 'Ikke medlem';
 }
-els.memberToggle.addEventListener('change', updateToggleLabel);
+function updateKontingentVisibility(){
+  els.kontingentToggleRow.style.display = els.memberToggle.checked ? 'flex' : 'none';
+}
+function updateKontingentLabel(){
+  els.kontingentStatusLabel.childNodes[0].textContent = els.kontingentToggle.checked ? 'Kontingent betalt' : 'Kontingent ikke betalt';
+}
+function updateModalHeadColor(){
+  els.venueModalHead.classList.remove('kontingent-paid', 'kontingent-unpaid');
+  if(els.memberToggle.checked){
+    els.venueModalHead.classList.add(els.kontingentToggle.checked ? 'kontingent-paid' : 'kontingent-unpaid');
+  }
+}
+els.memberToggle.addEventListener('change', () => {
+  updateToggleLabel();
+  updateKontingentVisibility();
+  updateModalHeadColor();
+});
+els.kontingentToggle.addEventListener('change', () => {
+  updateKontingentLabel();
+  updateModalHeadColor();
+});
 
 els.newVenueBtn.addEventListener('click', ()=>openVenueModal(null));
 els.venueModalClose.addEventListener('click', closeVenueModal);
@@ -1917,7 +2037,8 @@ els.saveVenueBtn.addEventListener('click', async ()=>{
     type: els.f_type.value.trim(),
     tilknytning: els.f_tilknytning.value,
     note: els.f_note.value.trim(),
-    medlem: els.memberToggle.checked
+    medlem: els.memberToggle.checked,
+    kontingentBetalt: els.memberToggle.checked ? els.kontingentToggle.checked : false
   };
   const row = venueToRow(payload);
   if(editingVenueId){
@@ -2453,6 +2574,35 @@ function openVenueEventsModal(venueId){
 els.showVenueEventsBtn.addEventListener('click', () => { if(editingVenueId) openVenueEventsModal(editingVenueId); });
 els.venueEventsClose.addEventListener('click', () => els.venueEventsOverlay.classList.remove('open'));
 els.venueEventsOverlay.addEventListener('click', (e) => { if(e.target === els.venueEventsOverlay) els.venueEventsOverlay.classList.remove('open'); });
+
+const LEGEND_TEXT = {
+  medlem: 'Ikke-medlem → Medlem (andel)',
+  sport: 'Ikke deltaget → Deltaget i sport (andel)',
+  kontingent: 'Ikke betalt → Betalt (andel af medlemmer)'
+};
+els.mapModeSelect.addEventListener('change', () => {
+  mapColorMode = els.mapModeSelect.value;
+  els.legendModeText.textContent = LEGEND_TEXT[mapColorMode];
+  renderMap();
+});
+
+// ---------- GENOPFRISK FORBINDELSE ----------
+els.refreshBtn.addEventListener('click', async () => {
+  els.refreshBtn.classList.add('spinning');
+  els.refreshBtn.disabled = true;
+  try{
+    try{ sb.removeAllChannels(); }catch(e){ console.warn(e); }
+    await loadDB();
+    subscribeRealtime();
+    showToast('Forbindelse til Supabase genopfrisket');
+  }catch(e){
+    console.error(e);
+    showToast('Kunne ikke genopfriske forbindelsen');
+  }finally{
+    els.refreshBtn.classList.remove('spinning');
+    els.refreshBtn.disabled = false;
+  }
+});
 
 // ---------- INIT ----------
 initMapZoomPan();

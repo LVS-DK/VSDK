@@ -1373,7 +1373,7 @@ let editingVenueId = null;
 let searchQuery = "";
 let viewMode = "all"; // 'all' | 'members' | 'nonmembers' | 'kommune' | 'sport-all' | 'event'
 let expandedRegions = new Set();
-let eventFilterId = null;
+let eventFilterIds = new Set();
 
 const els = {};
 ["navTabs","navVenuesTab","navEventsTab","navQuick","navTree","navEventsPlanned","navEventsPast","nqAllCount","nqMemberCount","nqNonmemberCount","nqSportCount",
@@ -1542,12 +1542,11 @@ function kommuneHasEventParticipant(code, eventId){
 }
 
 function colorForKommune(code){
-  if(viewMode === 'event' && eventFilterId){
-    const ev = db.events.find(e => e.id === eventFilterId);
-    if(ev){
-      if(ev.kommuneCode === code) return 'var(--event-blue)';
-      return kommuneHasEventParticipant(code, eventFilterId) ? 'var(--member)' : 'var(--map-empty)';
-    }
+  if(viewMode === 'event' && eventFilterIds.size > 0){
+    const selectedEvents = [...eventFilterIds].map(id => db.events.find(e => e.id === id)).filter(Boolean);
+    if(selectedEvents.some(ev => ev.kommuneCode === code)) return 'var(--event-blue)';
+    const hasParticipant = selectedEvents.some(ev => kommuneHasEventParticipant(code, ev.id));
+    return hasParticipant ? 'var(--member)' : 'var(--map-empty)';
   }
   const s = kommuneStats(code);
   const c1 = [0xBF,0x5B,0x2E], c2 = [0x2F,0x6B,0x4F]; // nonmember-farve -> member-farve
@@ -1660,12 +1659,16 @@ function showMapTooltip(e, m){
   els.mapTooltip.style.top = (e.clientY - rect.top) + 'px';
   els.mapTooltip.querySelector('.t-name').textContent = m.name;
   let subText;
-  if(viewMode === 'event' && eventFilterId){
-    const ev = db.events.find(x => x.id === eventFilterId);
-    if(ev && ev.kommuneCode === m.code){
-      subText = '📍 Begivenheden afholdes her';
-    } else if(ev && kommuneHasEventParticipant(m.code, eventFilterId)){
-      const n = db.vaerested.filter(v => v.kommuneCode === m.code && db.signups.some(sg => sg.eventId === eventFilterId && sg.vaerestedId === v.id)).length;
+  if(viewMode === 'event' && eventFilterIds.size > 0){
+    const selectedEvents = [...eventFilterIds].map(id => db.events.find(e => e.id === id)).filter(Boolean);
+    const hostedHere = selectedEvents.filter(ev => ev.kommuneCode === m.code);
+    const withParticipants = selectedEvents.filter(ev => kommuneHasEventParticipant(m.code, ev.id));
+    if(hostedHere.length > 0){
+      subText = hostedHere.length === 1
+        ? `📍 Afholder "${hostedHere[0].navn}"`
+        : `📍 Afholder ${hostedHere.length} af de valgte begivenheder`;
+    } else if(withParticipants.length > 0){
+      const n = db.vaerested.filter(v => v.kommuneCode === m.code && db.signups.some(sg => eventFilterIds.has(sg.eventId) && sg.vaerestedId === v.id)).length;
       subText = `${n} værested${n===1?'':'er'} med deltagere herfra`;
     } else {
       subText = 'Ingen deltagere herfra';
@@ -1818,7 +1821,7 @@ function selectKommune(code, name){
   } else {
     selectedKommune = { code, name };
     viewMode = 'kommune';
-    eventFilterId = null;
+    eventFilterIds.clear();
     const region = CODE_TO_REGION[code];
     if(region) expandedRegions.add(region);
   }
@@ -1826,14 +1829,13 @@ function selectKommune(code, name){
 }
 
 function selectEventFilter(id){
-  if(viewMode === 'event' && eventFilterId === id){
-    eventFilterId = null;
-    viewMode = 'all';
+  selectedKommune = null;
+  if(eventFilterIds.has(id)){
+    eventFilterIds.delete(id);
   } else {
-    eventFilterId = id;
-    viewMode = 'event';
-    selectedKommune = null;
+    eventFilterIds.add(id);
   }
+  viewMode = eventFilterIds.size > 0 ? 'event' : 'all';
   if(els.searchInput.value){
     els.searchInput.value = '';
     searchQuery = '';
@@ -1844,7 +1846,7 @@ function selectEventFilter(id){
 
 function clearSelection(){
   selectedKommune = null;
-  eventFilterId = null;
+  eventFilterIds.clear();
   viewMode = 'all';
   renderAll();
 }
@@ -1852,7 +1854,7 @@ function clearSelection(){
 function setViewMode(mode){
   viewMode = mode;
   selectedKommune = null;
-  eventFilterId = null;
+  eventFilterIds.clear();
   if(els.searchInput.value){
     els.searchInput.value = '';
     searchQuery = '';
@@ -1875,8 +1877,8 @@ function currentListVenues(){
     list = list.filter(v => !v.medlem);
   } else if(viewMode === 'sport-all'){
     list = list.filter(v => db.signups.some(s => s.vaerestedId === v.id));
-  } else if(viewMode === 'event' && eventFilterId){
-    const venueIds = new Set(db.signups.filter(s => s.eventId === eventFilterId).map(s => s.vaerestedId));
+  } else if(viewMode === 'event' && eventFilterIds.size > 0){
+    const venueIds = new Set(db.signups.filter(s => eventFilterIds.has(s.eventId)).map(s => s.vaerestedId));
     list = list.filter(v => venueIds.has(v.id));
   }
   // viewMode === 'all' -> ingen filter, viser alle
@@ -1890,7 +1892,7 @@ function renderStats(){
 }
 
 function renderHeader(){
-  const ev = viewMode === 'event' && eventFilterId ? db.events.find(e => e.id === eventFilterId) : null;
+  const selectedEvents = viewMode === 'event' ? [...eventFilterIds].map(id => db.events.find(e => e.id === id)).filter(Boolean) : [];
   if(searchQuery){
     els.shName.textContent = `Søgeresultater: "${searchQuery}"`;
     els.shClearBtn.style.display = 'none';
@@ -1899,8 +1901,10 @@ function renderHeader(){
     els.shName.textContent = selectedKommune.name;
     els.shClearBtn.style.display = 'flex';
     els.shActions.style.display = 'flex';
-  } else if(viewMode === 'event' && ev){
-    els.shName.textContent = '🏅 ' + ev.navn;
+  } else if(viewMode === 'event' && selectedEvents.length > 0){
+    els.shName.textContent = selectedEvents.length === 1
+      ? '🏅 ' + selectedEvents[0].navn
+      : `🏅 ${selectedEvents.length} sportsbegivenheder valgt`;
     els.shClearBtn.style.display = 'flex';
     els.shActions.style.display = 'none';
   } else if(viewMode === 'members'){
@@ -1927,10 +1931,13 @@ function renderHeader(){
     const s = kommuneStats(selectedKommune.code);
     els.scopeBanner.style.display = 'block';
     els.scopeBanner.textContent = `${s.members} medlem · ${s.nonmembers} ikke medlem i ${selectedKommune.name}`;
-  } else if(!searchQuery && viewMode === 'event' && ev){
-    const totalBrugere = db.signups.filter(s => s.eventId === ev.id).reduce((sum,s)=>sum+s.antalBrugere, 0);
+  } else if(!searchQuery && viewMode === 'event' && selectedEvents.length > 0){
+    const eventIdSet = new Set(selectedEvents.map(e => e.id));
+    const totalBrugere = db.signups.filter(s => eventIdSet.has(s.eventId)).reduce((sum,s)=>sum+s.antalBrugere, 0);
     els.scopeBanner.style.display = 'block';
-    els.scopeBanner.textContent = `${formatEventTid(ev.tid)} · ${escapeHtml(ev.sted||'')} · ${totalBrugere} brugere i alt`;
+    els.scopeBanner.textContent = selectedEvents.length === 1
+      ? `${formatEventTid(selectedEvents[0].tid)} · ${escapeHtml(selectedEvents[0].sted||'')} · ${totalBrugere} brugere i alt`
+      : `${selectedEvents.length} begivenheder · ${totalBrugere} brugere i alt`;
   } else {
     els.scopeBanner.style.display = 'none';
   }
@@ -1959,12 +1966,12 @@ function renderNavEvents(){
     if(!d || isNaN(d.getTime()) || d >= now) planned.push(ev);
     else past.push(ev);
   });
-  // Planlagte: snarest først, udaterede til sidst
+  // Planlagte: længst ude i fremtiden øverst, nærmeste forestående nederst, udaterede nederst
   planned.sort((a,b) => {
     if(!a.tid && !b.tid) return a.navn.localeCompare(b.navn, 'da');
     if(!a.tid) return 1;
     if(!b.tid) return -1;
-    return new Date(a.tid) - new Date(b.tid);
+    return new Date(b.tid) - new Date(a.tid);
   });
   // Afholdte: senest afholdte øverst
   past.sort((a,b) => new Date(b.tid) - new Date(a.tid));
@@ -1978,7 +1985,7 @@ function renderNavEvents(){
     list.forEach(ev => {
       const count = db.signups.filter(s => s.eventId === ev.id).length;
       const item = document.createElement('div');
-      item.className = 'nav-event-item' + (viewMode==='event' && eventFilterId===ev.id ? ' active' : '');
+      item.className = 'nav-event-item' + (viewMode==='event' && eventFilterIds.has(ev.id) ? ' active' : '');
       item.innerHTML = `
         <span class="ne-name">${escapeHtml(ev.navn)}</span>
         <span class="ne-meta">${escapeHtml(formatEventTidShort(ev.tid))} · ${count} værested${count===1?'':'er'}</span>
@@ -1993,7 +2000,7 @@ function renderNavEvents(){
 }
 
 function updateMapModeUI(){
-  const inEventMode = viewMode === 'event' && !!eventFilterId;
+  const inEventMode = viewMode === 'event' && eventFilterIds.size > 0;
   els.mapModeSwitch.style.display = inEventMode ? 'none' : 'flex';
   els.legendNormal.style.display = inEventMode ? 'none' : 'flex';
   els.legendEvent.style.display = inEventMode ? 'flex' : 'none';
@@ -2042,7 +2049,7 @@ function renderNavTree(){
 }
 
 function renderList(){
-  const ev = viewMode === 'event' && eventFilterId ? db.events.find(e => e.id === eventFilterId) : null;
+  const selectedEvents = viewMode === 'event' ? [...eventFilterIds] : [];
   const list = currentListVenues();
   els.listScroll.innerHTML = '';
   if(list.length === 0){
@@ -2068,7 +2075,10 @@ function renderList(){
   list.forEach(v => {
     const card = document.createElement('div');
     card.className = 'venue-card' + (v.medlem ? '' : ' nonmember');
-    const signup = ev ? db.signups.find(s => s.eventId === ev.id && s.vaerestedId === v.id) : null;
+    const mySignups = selectedEvents.length > 0
+      ? db.signups.filter(s => selectedEvents.includes(s.eventId) && s.vaerestedId === v.id)
+      : [];
+    const signupTotal = mySignups.reduce((sum,s) => sum + s.antalBrugere, 0);
     card.innerHTML = `
       <div class="vc-top">
         <div class="vc-name">${escapeHtml(v.navn)}${v.note ? ' <span class=\"vc-note-flag\" title=\"Har en note\">📝</span>' : ''}</div>
@@ -2076,7 +2086,7 @@ function renderList(){
       </div>
       <div class="vc-meta">${escapeHtml(v.type || 'Type ikke angivet')} · ${escapeHtml(v.tilknytning || 'Ukendt tilknytning')}</div>
       ${(searchQuery) ? `<div class="vc-kommune">${escapeHtml(v.kommuneName||'')}</div>` : ''}
-      ${signup ? `<div class="vc-kommune">🏅 ${signup.antalBrugere} bruger${signup.antalBrugere===1?'':'e'} tilmeldt</div>` : ''}
+      ${mySignups.length > 0 ? `<div class="vc-kommune">🏅 ${signupTotal} bruger${signupTotal===1?'':'e'} tilmeldt (${mySignups.length} begivenhed${mySignups.length===1?'':'er'})</div>` : ''}
     `;
     card.addEventListener('click', () => openVenueModal(v.id));
     els.listScroll.appendChild(card);

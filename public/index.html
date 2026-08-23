@@ -1259,11 +1259,11 @@
         </div>
       </div>
       <div class="field">
-        <label for="f_type">Type værestedsbrugere</label>
+        <label for="f_type">Type værested</label>
         <input type="text" id="f_type" placeholder="F.eks. Værested for hjemløse, Cafémiljø, Aktivitetscenter">
       </div>
       <div class="field">
-        <label for="f_tilknytning">Tilknytning</label>
+        <label for="f_tilknytning">Driftsform</label>
         <select id="f_tilknytning">
           <option value="Offentligt">Offentligt</option>
           <option value="Privat">Privat</option>
@@ -2855,22 +2855,36 @@ function openVenueEventsModal(venueId){
   if(!v) return;
   els.venueEventsTitle.textContent = v.navn + ' — Sportsbegivenheder';
   const mySignups = db.signups.filter(s => s.vaerestedId === venueId);
+  els.venueEventsList.innerHTML = '';
   if(mySignups.length === 0){
     els.venueEventsList.innerHTML = '<div class="empty-hint">Dette værested har ikke deltaget i nogen sportsbegivenheder endnu.</div>';
   } else {
-    els.venueEventsList.innerHTML = mySignups
+    mySignups
       .map(s => ({ s, ev: db.events.find(e => e.id === s.eventId) }))
       .filter(x => x.ev)
       .sort((a,b) => new Date(b.ev.tid||0) - new Date(a.ev.tid||0))
-      .map(({s, ev}) => `
-        <div class="venue-event-card">
+      .forEach(({s, ev}) => {
+        const card = document.createElement('div');
+        card.className = 'venue-event-card';
+        card.innerHTML = `
           <div class="vec-name">${escapeHtml(ev.navn)}</div>
           <div class="vec-meta">📍 ${escapeHtml(ev.sted || 'Sted ikke angivet')} · 🕒 ${escapeHtml(formatEventTid(ev.tid))}</div>
           <div class="vec-count">${s.antalBrugere} bruger${s.antalBrugere===1?'':'e'} tilmeldt</div>
-        </div>
-      `).join('');
+          <button class="btn btn-danger btn-sm vec-unsubscribe" style="width:100%;margin-top:8px;">Afmeld</button>
+        `;
+        card.querySelector('.vec-unsubscribe').addEventListener('click', () => unsubscribeFromVenueView(s.id, venueId));
+        els.venueEventsList.appendChild(card);
+      });
   }
   els.venueEventsOverlay.classList.add('open');
+}
+async function unsubscribeFromVenueView(signupId, venueId){
+  if(!confirm('Afmeld denne tilmelding?')) return;
+  const { error } = await sb.from('tilmeldinger').delete().eq('id', signupId);
+  if(error){ showToast('Kunne ikke afmelde'); console.error(error); return; }
+  await loadDB();
+  openVenueEventsModal(venueId);
+  showToast('Tilmelding afmeldt');
 }
 els.showVenueEventsBtn.addEventListener('click', () => { if(editingVenueId) openVenueEventsModal(editingVenueId); });
 els.venueEventsClose.addEventListener('click', () => els.venueEventsOverlay.classList.remove('open'));

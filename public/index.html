@@ -285,6 +285,7 @@
     padding:0 10px 14px 10px;
   }
   .nav-quick-btn.is-sport.active{border-color:var(--select); background:var(--select-glow);}
+  .nav-quick-btn.is-former.active{border-color:var(--select); background:var(--select-glow);}
   .nav-region{
     margin-bottom:2px;
   }
@@ -442,6 +443,42 @@
     background:var(--panel);
     cursor:pointer;
     max-width:210px;
+  }
+  .timeline-controls{
+    margin-top:4px;
+    width:220px;
+  }
+  .timeline-year-row{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    margin-bottom:2px;
+  }
+  .timeline-year-row button{
+    border:none;
+    background:var(--select);
+    color:#fff;
+    width:24px;height:24px;
+    border-radius:50%;
+    cursor:pointer;
+    font-size:11px;
+    display:flex;align-items:center;justify-content:center;
+    flex-shrink:0;
+  }
+  .timeline-year-row button.playing{ background:var(--nonmember); }
+  .timeline-year-label{
+    font-family:'Inter',sans-serif;
+    font-weight:700;
+    font-size:15px;
+    color:var(--ink);
+  }
+  .timeline-controls input[type="range"]{
+    width:100%;
+    accent-color:var(--select);
+    cursor:pointer;
+  }
+  .legend-bar-timeline{
+    background:linear-gradient(90deg, #DDF0E2, #1B4D33);
   }
   .zoom-controls{
     position:absolute;
@@ -652,6 +689,13 @@
   .vc-meta{font-size:12.5px;color:var(--ink-soft);margin-top:3px;}
   .vc-note-flag{font-size:11px;}
   .vc-kommune{font-size:11.5px;color:var(--ink-soft);margin-top:5px;font-style:italic;}
+  .vc-tags{ display:flex; gap:5px; margin-top:6px; flex-wrap:wrap; }
+  .vc-tag{
+    font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.03em;
+    padding:2px 8px; border-radius:20px;
+  }
+  .vc-tag-closed{ background:var(--panel-2); color:var(--ink-soft); }
+  .vc-tag-former{ background:var(--select-glow); color:#8a6a1f; }
 
   .empty-state{
     padding:40px 24px;
@@ -696,6 +740,7 @@
     border-bottom:1px solid var(--line);
     position:sticky;top:0;background:var(--paper);
     transition:background .15s;
+    z-index:20;
   }
   .modal-head.kontingent-paid{ background:var(--member-soft); border-bottom-color:var(--member); }
   .modal-head.kontingent-unpaid{ background:var(--nonmember-soft); border-bottom-color:var(--nonmember); }
@@ -710,6 +755,14 @@
     cursor:pointer;font-size:16px;color:var(--ink-soft);
   }
   .modal-close:hover{background:var(--line);}
+  .modal-head-actions{ display:flex; align-items:center; gap:8px; flex-shrink:0; }
+  .modal-icon-btn{
+    border:none;background:var(--panel-2);
+    width:28px;height:28px;border-radius:8px;
+    cursor:pointer;font-size:14px;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .modal-icon-btn:hover{ background:var(--line); }
   .modal-body{padding:20px 22px 22px 22px;}
 
   /* SPORTSBEGIVENHEDER */
@@ -725,8 +778,28 @@
     display:flex;
     flex-direction:column;
     padding:16px;
-    gap:12px;
+    gap:0;
     overflow-y:auto;
+  }
+  .sports-search-input{
+    width:100%;
+    padding:8px 11px;
+    border:1px solid var(--line);
+    border-radius:7px;
+    font-family:'Inter',sans-serif;
+    font-size:13px;
+    color:var(--ink);
+    background:var(--panel);
+    outline:none;
+    margin:10px 0 4px 0;
+  }
+  .sports-search-input:focus{ border-color:var(--select); background:var(--paper); }
+  #newEventBtn{ margin-bottom:0; }
+  .nav-events-search-wrap{ padding:0 10px; }
+  .show-older-btn{
+    width:100%;
+    margin-top:4px;
+    font-size:12px;
   }
   .sports-event-list{
     display:flex;
@@ -864,6 +937,15 @@
   }
   .toggle-label{font-size:14px;font-weight:600;}
   .toggle-label .sub{display:block;font-size:11.5px;font-weight:400;color:var(--ink-soft);margin-top:1px;}
+  .former-member-banner{
+    background:var(--select-glow);
+    border:1px solid var(--select);
+    border-radius:8px;
+    padding:10px 14px;
+    font-size:13px;
+    color:#8a6a1f;
+    margin-bottom:16px;
+  }
   .switch{
     position:relative;
     width:46px;height:26px;
@@ -890,6 +972,36 @@
   .switch input:checked + .switch-track{background:var(--member);}
   .switch input:checked + .switch-track::before{transform:translateX(20px);}
 
+  .modal-tabs{
+    display:flex;
+    gap:2px;
+    border-bottom:1px solid var(--line);
+    margin:0 0 16px 0;
+  }
+  .modal-tab{
+    padding:10px 16px;
+    border:none;
+    background:none;
+    font-family:'Inter',sans-serif;
+    font-size:13.5px;
+    font-weight:600;
+    color:var(--ink-soft);
+    cursor:pointer;
+    border-bottom:2px solid transparent;
+    white-space:nowrap;
+  }
+  .modal-tab:hover{ color:var(--ink); background:var(--panel-2); }
+  .modal-tab.active{ color:var(--ink); border-bottom-color:var(--select); }
+  .modal-tab-content{ min-height:120px; }
+  .venue-modal-footer-area{
+    position:sticky;
+    bottom:0;
+    background:var(--paper);
+    padding-top:12px;
+    margin-top:10px;
+    border-top:1px solid var(--line);
+    z-index:20;
+  }
   .modal-footer{
     display:flex;
     gap:10px;
@@ -1115,13 +1227,20 @@
             <span class="nq-label">🏅 Deltaget i sport</span>
             <span class="nq-count" id="nqSportCount">0</span>
           </button>
+          <button class="nav-quick-btn is-former" data-mode="former-members">
+            <span class="nq-label">⏳ Tidligere medlemmer</span>
+            <span class="nq-count" id="nqFormerCount">0</span>
+          </button>
         </div>
         <div class="nav-divider"><span>Regioner</span></div>
         <div class="nav-tree" id="navTree"></div>
       </div>
 
       <div class="nav-tab-content" id="navEventsTab" style="display:none;">
-        <div class="nav-divider" style="margin-top:14px;"><span>Planlagte</span></div>
+        <div class="nav-events-search-wrap">
+          <input type="text" id="navEventsSearch" class="sports-search-input" placeholder="Søg begivenhed, sted…" autocomplete="off">
+        </div>
+        <div class="nav-divider"><span>Planlagte</span></div>
         <div class="nav-events-list" id="navEventsPlanned"></div>
         <div class="nav-divider"><span>Afholdte</span></div>
         <div class="nav-events-list" id="navEventsPast"></div>
@@ -1153,7 +1272,15 @@
           <option value="medlem">Medlem / Ikke medlem</option>
           <option value="sport">Deltaget i sport / Ikke deltaget</option>
           <option value="kontingent">Kontingent betalt / Ikke betalt</option>
+          <option value="tidslinje">Medlemsudvikling over tid</option>
         </select>
+        <div class="timeline-controls" id="timelineControls" style="display:none;">
+          <div class="timeline-year-row">
+            <button id="timelinePlayBtn" type="button" title="Afspil">▶</button>
+            <span class="timeline-year-label" id="timelineYearLabel">2002</span>
+          </div>
+          <input type="range" id="timelineSlider" min="2002" max="2025" step="1" value="2002">
+        </div>
       </div>
       <div class="zoom-controls">
         <button id="zoomInBtn" title="Zoom ind">+</button>
@@ -1172,6 +1299,12 @@
         <span class="legend-swatch" style="background:var(--member);"></span> Har deltagere
         <span style="margin-left:6px;">·</span>
         <span class="legend-swatch" style="background:var(--map-empty);"></span> Ingen deltagere
+      </div>
+      <div class="legend" id="legendTimeline" style="display:none;">
+        <span class="legend-empty"></span> 0 medlemmer
+        <span style="margin-left:6px;">·</span>
+        <span class="legend-bar legend-bar-timeline"></span>
+        <span>1 medlem → 7+ medlemmer</span>
       </div>
     </div>
 
@@ -1213,7 +1346,10 @@
   <div class="modal">
     <div class="modal-head" id="venueModalHead">
       <h2 id="venueModalTitle">Nyt værested</h2>
-      <button class="modal-close" id="venueModalClose">✕</button>
+      <div class="modal-head-actions">
+        <button class="modal-icon-btn" id="showVenueEventsBtn" title="Se sportsbegivenheder" style="display:none;">🏅</button>
+        <button class="modal-close" id="venueModalClose">✕</button>
+      </div>
     </div>
     <div class="modal-body">
       <div class="toggle-row">
@@ -1236,78 +1372,108 @@
         </label>
       </div>
 
-      <div class="field">
-        <label for="f_navn">Navn</label>
-        <input type="text" id="f_navn" placeholder="F.eks. Kirkens Korshær Café Blomsten">
+      <div class="field" id="medlemSidenField">
+        <label for="f_medlem_siden">Medlem siden</label>
+        <input type="month" id="f_medlem_siden">
       </div>
-      <div class="field">
-        <label for="f_adresse">Adresse</label>
-        <input type="text" id="f_adresse" placeholder="Vejnavn 12, 8000 Aarhus C">
+
+      <div class="former-member-banner" id="formerMemberBanner" style="display:none;">
+        ⏳ Tidligere medlem — meldte sig ud, men er ikke medlem lige nu
       </div>
-      <div class="field">
-        <label for="f_kommune">Kommune</label>
-        <select id="f_kommune"></select>
+
+      <div class="modal-tabs" id="venueModalTabs">
+        <button class="modal-tab active" data-tab="generelt">Generelt</button>
+        <button class="modal-tab" data-tab="detaljer">Detaljer</button>
+        <button class="modal-tab" data-tab="note">Note</button>
       </div>
-      <div class="field-row">
+
+      <div class="modal-tab-content" id="venueTabGenerelt">
         <div class="field">
-          <label for="f_telefon">Kontakttelefon</label>
-          <input type="text" id="f_telefon" placeholder="12 34 56 78">
+          <label for="f_navn">Navn</label>
+          <input type="text" id="f_navn" placeholder="F.eks. Kirkens Korshær Café Blomsten">
         </div>
         <div class="field">
-          <label for="f_email">E-mail</label>
-          <input type="text" id="f_email" placeholder="kontakt@sted.dk">
+          <label for="f_adresse">Adresse</label>
+          <input type="text" id="f_adresse" placeholder="Vejnavn 12, 8000 Aarhus C">
+        </div>
+        <div class="field">
+          <label for="f_kommune">Kommune</label>
+          <select id="f_kommune"></select>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label for="f_telefon">Kontakttelefon</label>
+            <input type="text" id="f_telefon" placeholder="12 34 56 78">
+          </div>
+          <div class="field">
+            <label for="f_email">E-mail</label>
+            <input type="text" id="f_email" placeholder="kontakt@sted.dk">
+          </div>
         </div>
       </div>
-      <div class="field">
-        <label for="f_type">Type værested</label>
-        <input type="text" id="f_type" placeholder="F.eks. Værested for hjemløse, Cafémiljø, Aktivitetscenter">
-      </div>
-      <div class="field">
-        <label for="f_tilknytning">Driftsform</label>
-        <select id="f_tilknytning">
-          <option value="Offentligt">Offentligt</option>
-          <option value="Privat">Privat</option>
-          <option value="Frivilligt drevet">Frivilligt drevet</option>
-        </select>
-      </div>
-      <div class="field">
-        <label>Finansiering</label>
-        <label class="checkbox-row"><input type="checkbox" id="f_fin_offentlig" name="finansiering"> Offentlig</label>
-        <label class="checkbox-row"><input type="checkbox" id="f_fin_privat" name="finansiering"> Privat</label>
-        <label class="checkbox-row"><input type="checkbox" id="f_fin_delvist" name="finansiering"> Delvist offentligt tilskud</label>
-      </div>
-      <div class="field-row">
+
+      <div class="modal-tab-content" id="venueTabDetaljer" style="display:none;">
         <div class="field">
-          <label for="f_ansatte">Antal ansatte</label>
-          <select id="f_ansatte">
-            <option value="">Ikke angivet</option>
-            <option value="1-3">1-3</option>
-            <option value="4-6">4-6</option>
-            <option value="7-10">7-10</option>
-            <option value="10+">10+</option>
+          <label for="f_status">Status <span id="statusSuperuserHint" style="display:none;font-weight:400;text-transform:none;letter-spacing:0;color:var(--ink-soft);">(kun superbruger kan ændre)</span></label>
+          <select id="f_status">
+            <option value="Aktiv">Aktiv</option>
+            <option value="Lukket">Lukket</option>
           </select>
         </div>
         <div class="field">
-          <label for="f_frivillige">Antal frivillige</label>
-          <select id="f_frivillige">
-            <option value="">Ikke angivet</option>
-            <option value="1-3">1-3</option>
-            <option value="4-6">4-6</option>
-            <option value="7-10">7-10</option>
-            <option value="10+">10+</option>
+          <label for="f_type">Type værested</label>
+          <input type="text" id="f_type" placeholder="F.eks. Værested for hjemløse, Cafémiljø, Aktivitetscenter">
+        </div>
+        <div class="field">
+          <label for="f_tilknytning">Driftsform</label>
+          <select id="f_tilknytning">
+            <option value="Offentligt">Offentligt</option>
+            <option value="Privat">Privat</option>
+            <option value="Frivilligt drevet">Frivilligt drevet</option>
           </select>
         </div>
-      </div>
-      <div class="field">
-        <label for="f_note">Note</label>
-        <textarea id="f_note" placeholder="F.eks. særlige forhold, kontaktperson, aftaler eller andet at huske..."></textarea>
+        <div class="field">
+          <label>Finansiering</label>
+          <label class="checkbox-row"><input type="checkbox" id="f_fin_offentlig" name="finansiering"> Offentlig</label>
+          <label class="checkbox-row"><input type="checkbox" id="f_fin_privat" name="finansiering"> Privat</label>
+          <label class="checkbox-row"><input type="checkbox" id="f_fin_delvist" name="finansiering"> Delvist offentligt tilskud</label>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label for="f_ansatte">Antal ansatte</label>
+            <select id="f_ansatte">
+              <option value="">Ikke angivet</option>
+              <option value="1-3">1-3</option>
+              <option value="4-6">4-6</option>
+              <option value="7-10">7-10</option>
+              <option value="10+">10+</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="f_frivillige">Antal frivillige</label>
+            <select id="f_frivillige">
+              <option value="">Ikke angivet</option>
+              <option value="1-3">1-3</option>
+              <option value="4-6">4-6</option>
+              <option value="7-10">7-10</option>
+              <option value="10+">10+</option>
+            </select>
+          </div>
+        </div>
       </div>
 
-      <button class="btn btn-ghost venue-events-btn" id="showVenueEventsBtn" style="display:none;">🏅 Se sportsbegivenheder</button>
+      <div class="modal-tab-content" id="venueTabNote" style="display:none;">
+        <div class="field">
+          <label for="f_note">Note</label>
+          <textarea id="f_note" placeholder="F.eks. særlige forhold, kontaktperson, aftaler eller andet at huske..." style="min-height:220px;"></textarea>
+        </div>
+      </div>
 
-      <div class="modal-footer">
-        <button class="btn btn-danger" id="deleteVenueBtn" style="display:none;">Slet</button>
-        <button class="btn btn-primary" id="saveVenueBtn">Gem værested</button>
+      <div class="venue-modal-footer-area">
+        <div class="modal-footer">
+          <button class="btn btn-danger" id="deleteVenueBtn" style="display:none;">Slet</button>
+          <button class="btn btn-primary" id="saveVenueBtn">Gem værested</button>
+        </div>
       </div>
     </div>
   </div>
@@ -1380,7 +1546,11 @@
     <div class="modal-body sports-body">
       <div class="sports-list-pane">
         <button class="btn btn-primary" id="newEventBtn">+ Ny begivenhed</button>
-        <div class="sports-event-list" id="sportsEventList"></div>
+        <input type="text" id="sportsEventSearch" class="sports-search-input" placeholder="Søg begivenhed, sted…" autocomplete="off">
+        <div class="nav-divider" style="padding-left:0;"><span>Planlagte</span></div>
+        <div class="sports-event-list" id="sportsEventListPlanned"></div>
+        <div class="nav-divider" style="padding-left:0;"><span>Afholdte</span></div>
+        <div class="sports-event-list" id="sportsEventListPast"></div>
       </div>
       <div class="sports-detail-pane" id="sportsDetailPane">
         <div class="empty-hint">Vælg en begivenhed i listen, eller opret en ny.</div>
@@ -1470,20 +1640,22 @@ let expandedRegions = new Set();
 let eventFilterIds = new Set();
 
 const els = {};
-["navTabs","navVenuesTab","navEventsTab","navQuick","navTree","navEventsPlanned","navEventsPast","nqAllCount","nqMemberCount","nqNonmemberCount","nqSportCount",
- "mapModeSwitch","legendNormal","legendEvent",
+["navTabs","navVenuesTab","navEventsTab","navQuick","navTree","navEventsPlanned","navEventsPast","navEventsSearch","nqAllCount","nqMemberCount","nqNonmemberCount","nqSportCount","nqFormerCount",
+ "mapModeSwitch","legendNormal","legendEvent","legendTimeline",
+ "timelineControls","timelinePlayBtn","timelineYearLabel","timelineSlider",
  "zoomInBtn","zoomOutBtn","zoomResetBtn","mapModeSelect","legendModeText","insetFrame","insetFrameTop","insetTitle","insetToggleBtn",
  "searchInput","searchClear","newVenueBtn","dkMap","mapTooltip","statTotal","statMember","statNonmember",
  "shName","shClearBtn","shCount","shActions","byraadBtn","listScroll","scopeBanner",
- "venueOverlay","venueModalTitle","venueModalClose","venueModalHead","toggleStatusLabel","memberToggle",
+ "venueOverlay","venueModalTitle","venueModalClose","venueModalHead","venueModalTabs","toggleStatusLabel","memberToggle",
  "kontingentToggleRow","kontingentStatusLabel","kontingentToggle",
  "f_navn","f_adresse","f_kommune","f_telefon","f_email","f_type","f_tilknytning","f_note",
  "f_fin_offentlig","f_fin_privat","f_fin_delvist","f_ansatte","f_frivillige",
+ "f_medlem_siden","medlemSidenField","formerMemberBanner","f_status","statusSuperuserHint",
  "deleteVenueBtn","saveVenueBtn",
  "kommuneOverlay","kommuneModalTitle","kommuneModalClose",
  "openSportsBtn","refreshBtn","openExportBtn","exportOverlay","exportModalClose",
  "exportDatasetSelect","exportFieldList","exportSelectAllBtn","exportSelectNoneBtn","exportFormatToggle","exportRunBtn",
- "sportsOverlay","sportsModalClose","sportsEventList","sportsDetailPane","newEventBtn",
+ "sportsOverlay","sportsModalClose","sportsEventListPlanned","sportsEventListPast","sportsEventSearch","sportsDetailPane","newEventBtn",
  "showVenueEventsBtn","venueEventsOverlay","venueEventsTitle","venueEventsClose","venueEventsList",
  "byraadList","addByraadBtn","byraadForm","bf_navn","bf_borgmester","bf_socialudvalg","byraadCancelBtn","byraadSaveBtn",
  "medierSection","medieList","addMedieBtn","medieForm","mf_navn","mf_note","medieCancelBtn","medieSaveBtn",
@@ -1507,7 +1679,10 @@ function rowToVenue(r){
     kontingentBetalt: !!r.kontingent_betalt,
     finansiering: r.finansiering || '',
     antalAnsatte: r.antal_ansatte || '',
-    antalFrivillige: r.antal_frivillige || ''
+    antalFrivillige: r.antal_frivillige || '',
+    medlemSiden: r.medlem_siden || '',
+    tidligereMedlem: !!r.tidligere_medlem,
+    status: r.status || 'Aktiv'
   };
 }
 function venueToRow(v){
@@ -1525,7 +1700,10 @@ function venueToRow(v){
     kontingent_betalt: v.kontingentBetalt || false,
     finansiering: v.finansiering || null,
     antal_ansatte: v.antalAnsatte || null,
-    antal_frivillige: v.antalFrivillige || null
+    antal_frivillige: v.antalFrivillige || null,
+    medlem_siden: v.medlemSiden || null,
+    tidligere_medlem: v.tidligereMedlem || false,
+    status: v.status || 'Aktiv'
   };
 }
 
@@ -1559,6 +1737,34 @@ function rowToSignup(r){
   };
 }
 
+async function reloadVenues(){
+  const { data, error } = await sb.from('vaeresteder').select('*');
+  if(error){ console.error('Kunne ikke hente væresteder', error); return; }
+  db.vaerested = (data || []).map(rowToVenue);
+  renderAll();
+}
+async function reloadKommuneInfo(){
+  const { data, error } = await sb.from('kommune_info').select('*');
+  if(error){ console.error('Kunne ikke hente kommuneinfo', error); return; }
+  db.kommuneInfo = {};
+  (data || []).forEach(r => {
+    db.kommuneInfo[r.kommune_code] = { byraad: r.byraad || '', medier: r.medier || '' };
+  });
+  renderAll();
+}
+async function reloadEvents(){
+  const { data, error } = await sb.from('sportsbegivenheder').select('*');
+  if(error){ console.error('Kunne ikke hente sportsbegivenheder', error); return; }
+  db.events = (data || []).map(rowToEvent);
+  renderAll();
+}
+async function reloadSignups(){
+  const { data, error } = await sb.from('tilmeldinger').select('*');
+  if(error){ console.error('Kunne ikke hente tilmeldinger', error); return; }
+  db.signups = (data || []).map(rowToSignup);
+  renderAll();
+}
+
 async function loadDB(){
   try{
     const [venuesRes, kommuneRes, eventsRes, signupsRes] = await Promise.all([
@@ -1588,13 +1794,14 @@ async function loadDB(){
   renderAll();
 }
 
-// Live-opdatering: hvis en kollega ændrer noget, henter vi data igen automatisk
+// Live-opdatering: hvis en kollega ændrer noget, henter vi KUN den tabel der ændrede sig
+// (i stedet for alt data hver gang) — vigtigt når der er mange begivenheder/tilmeldinger.
 function subscribeRealtime(){
   sb.channel('db-changes')
-    .on('postgres_changes', { event: '*', schema: 'public', table: 'vaeresteder' }, () => { loadDB(); })
-    .on('postgres_changes', { event: '*', schema: 'public', table: 'kommune_info' }, () => { loadDB(); })
-    .on('postgres_changes', { event: '*', schema: 'public', table: 'sportsbegivenheder' }, () => { loadDB(); })
-    .on('postgres_changes', { event: '*', schema: 'public', table: 'tilmeldinger' }, () => { loadDB(); })
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'vaeresteder' }, () => { reloadVenues(); })
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'kommune_info' }, () => { reloadKommuneInfo(); })
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'sportsbegivenheder' }, () => { reloadEvents(); })
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'tilmeldinger' }, () => { reloadSignups(); })
     .subscribe();
 }
 
@@ -1608,7 +1815,12 @@ function showToast(msg){
 function uid(){ return 'v_' + Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
 
 // ---------- MAP RENDER ----------
-let mapColorMode = 'medlem'; // 'medlem' | 'sport' | 'kontingent'
+let mapColorMode = 'medlem'; // 'medlem' | 'sport' | 'kontingent' | 'tidslinje'
+const TIMELINE_MIN_YEAR = 2002;
+const TIMELINE_MAX_YEAR = new Date().getFullYear();
+let timelineYear = TIMELINE_MIN_YEAR;
+let timelinePlaying = false;
+let timelineIntervalId = null;
 
 function kommuneStats(code){
   const vs = db.vaerested.filter(v => v.kommuneCode === code);
@@ -1640,6 +1852,9 @@ function colorForKommune(code){
     const hasParticipant = selectedEvents.some(ev => kommuneHasEventParticipant(code, ev.id));
     return hasParticipant ? 'var(--member)' : 'var(--map-empty)';
   }
+  if(mapColorMode === 'tidslinje'){
+    return colorForKommuneTimeline(code);
+  }
   const s = kommuneStats(code);
   const c1 = [0xBF,0x5B,0x2E], c2 = [0x2F,0x6B,0x4F]; // nonmember-farve -> member-farve
   let ratio, total;
@@ -1655,6 +1870,28 @@ function colorForKommune(code){
   }
   if(total === 0) return 'var(--map-empty)';
   const mix = c1.map((c,i)=>Math.round(c + (c2[i]-c)*ratio));
+  return `rgb(${mix[0]},${mix[1]},${mix[2]})`;
+}
+
+// ---------- TIDSLINJE: medlemmer over tid ----------
+function kommuneMemberCountByYear(code, year){
+  return db.vaerested.filter(v => {
+    if(v.kommuneCode !== code) return false;
+    if(!v.medlemSiden) return false;
+    const joinedYear = parseInt(v.medlemSiden.slice(0,4), 10);
+    if(isNaN(joinedYear)) return false;
+    return joinedYear <= year;
+  }).length;
+}
+
+function colorForKommuneTimeline(code){
+  const count = kommuneMemberCountByYear(code, timelineYear);
+  if(count === 0) return 'var(--map-empty)';
+  const capped = Math.min(count, 7);
+  const t = (capped - 1) / 6; // 0..1
+  const c1 = [0xDD,0xF0,0xE2]; // meget lys grøn (1 medlem)
+  const c2 = [0x1B,0x4D,0x33]; // meget mørk grøn (7+ medlemmer)
+  const mix = c1.map((c,i)=>Math.round(c + (c2[i]-c)*t));
   return `rgb(${mix[0]},${mix[1]},${mix[2]})`;
 }
 
@@ -1767,6 +2004,11 @@ function showMapTooltip(e, m){
     }
   } else if(s.total === 0){
     subText = 'Ingen registrerede væresteder';
+  } else if(mapColorMode === 'tidslinje'){
+    const count = kommuneMemberCountByYear(m.code, timelineYear);
+    subText = count === 0
+      ? `Ingen medlemmer i ${timelineYear}`
+      : `${count} medlem${count===1?'':'mer'} i ${timelineYear}`;
   } else if(mapColorMode === 'sport'){
     subText = `${s.total} værested${s.total===1?'':'er'} · ${s.deltaget} deltaget · ${s.ikkeDeltaget} ikke deltaget`;
   } else if(mapColorMode === 'kontingent'){
@@ -1969,6 +2211,8 @@ function currentListVenues(){
     list = list.filter(v => !v.medlem);
   } else if(viewMode === 'sport-all'){
     list = list.filter(v => db.signups.some(s => s.vaerestedId === v.id));
+  } else if(viewMode === 'former-members'){
+    list = list.filter(v => v.tidligereMedlem && !v.medlem);
   } else if(viewMode === 'event' && eventFilterIds.size > 0){
     const venueIds = new Set(db.signups.filter(s => eventFilterIds.has(s.eventId)).map(s => s.vaerestedId));
     list = list.filter(v => venueIds.has(v.id));
@@ -2011,6 +2255,10 @@ function renderHeader(){
     els.shName.textContent = 'Deltaget i sport';
     els.shClearBtn.style.display = 'none';
     els.shActions.style.display = 'none';
+  } else if(viewMode === 'former-members'){
+    els.shName.textContent = '⏳ Tidligere medlemmer';
+    els.shClearBtn.style.display = 'none';
+    els.shActions.style.display = 'none';
   } else {
     els.shName.textContent = 'Alle væresteder';
     els.shClearBtn.style.display = 'none';
@@ -2039,21 +2287,36 @@ function renderNavQuick(){
   const total = db.vaerested.length;
   const members = db.vaerested.filter(v=>v.medlem).length;
   const deltaget = db.vaerested.filter(v => db.signups.some(s => s.vaerestedId === v.id)).length;
+  const former = db.vaerested.filter(v => v.tidligereMedlem && !v.medlem).length;
   els.nqAllCount.textContent = total;
   els.nqMemberCount.textContent = members;
   els.nqNonmemberCount.textContent = total - members;
   if(els.nqSportCount) els.nqSportCount.textContent = deltaget;
+  if(els.nqFormerCount) els.nqFormerCount.textContent = former;
   els.navQuick.querySelectorAll('.nav-quick-btn').forEach(btn => {
     btn.classList.toggle('active', btn.dataset.mode === viewMode);
   });
 }
 
-function renderNavEvents(){
-  if(!els.navEventsPlanned || !els.navEventsPast) return;
+const PAST_EVENTS_DEFAULT_DAYS = 60;
+let navEventsQuery = '';
+let navShowAllPast = false;
+let modalEventsQuery = '';
+let modalShowAllPast = false;
+
+function splitAndFilterEvents(query){
   const now = new Date();
+  const q = (query || '').trim().toLowerCase();
+  const matches = (ev) => {
+    if(!q) return true;
+    return ev.navn.toLowerCase().includes(q) ||
+      (ev.sted||'').toLowerCase().includes(q) ||
+      (ev.kommuneName||'').toLowerCase().includes(q);
+  };
   const planned = [];
   const past = [];
   db.events.forEach(ev => {
+    if(!matches(ev)) return;
     const d = ev.tid ? new Date(ev.tid) : null;
     if(!d || isNaN(d.getTime()) || d >= now) planned.push(ev);
     else past.push(ev);
@@ -2067,6 +2330,14 @@ function renderNavEvents(){
   });
   // Afholdte: senest afholdte øverst
   past.sort((a,b) => new Date(b.tid) - new Date(a.tid));
+  return { planned, past };
+}
+
+function renderEventListInto({ plannedContainer, pastContainer, query, showAllPast, onToggleShowAll, onItemClick, isActive }){
+  const { planned, past } = splitAndFilterEvents(query);
+  const cutoff = new Date(Date.now() - PAST_EVENTS_DEFAULT_DAYS * 24 * 60 * 60 * 1000);
+  const visiblePast = showAllPast ? past : past.filter(ev => ev.tid && new Date(ev.tid) >= cutoff);
+  const hiddenCount = past.length - visiblePast.length;
 
   const renderInto = (container, list, emptyMsg) => {
     container.innerHTML = '';
@@ -2077,25 +2348,62 @@ function renderNavEvents(){
     list.forEach(ev => {
       const count = db.signups.filter(s => s.eventId === ev.id).length;
       const item = document.createElement('div');
-      item.className = 'nav-event-item' + (viewMode==='event' && eventFilterIds.has(ev.id) ? ' active' : '');
+      item.className = 'nav-event-item' + (isActive(ev.id) ? ' active' : '');
       item.innerHTML = `
         <span class="ne-name">${escapeHtml(ev.navn)}</span>
         <span class="ne-meta">${escapeHtml(formatEventTidShort(ev.tid))} · ${count} værested${count===1?'':'er'}</span>
       `;
-      item.addEventListener('click', () => selectEventFilter(ev.id));
+      item.addEventListener('click', () => onItemClick(ev.id));
       container.appendChild(item);
     });
   };
 
-  renderInto(els.navEventsPlanned, planned, 'Ingen planlagte begivenheder.');
-  renderInto(els.navEventsPast, past, 'Ingen afholdte begivenheder endnu.');
+  renderInto(plannedContainer, planned, query ? 'Ingen planlagte begivenheder matcher søgningen.' : 'Ingen planlagte begivenheder.');
+  renderInto(pastContainer, visiblePast, query ? 'Ingen afholdte begivenheder matcher søgningen.' : 'Ingen afholdte begivenheder endnu.');
+
+  if(hiddenCount > 0){
+    const btn = document.createElement('button');
+    btn.className = 'btn btn-ghost show-older-btn';
+    btn.textContent = `Vis ${hiddenCount} ældre begivenhed${hiddenCount===1?'':'er'}`;
+    btn.addEventListener('click', onToggleShowAll);
+    pastContainer.appendChild(btn);
+  }
+}
+
+function renderNavEvents(){
+  if(!els.navEventsPlanned || !els.navEventsPast) return;
+  renderEventListInto({
+    plannedContainer: els.navEventsPlanned,
+    pastContainer: els.navEventsPast,
+    query: navEventsQuery,
+    showAllPast: navShowAllPast,
+    onToggleShowAll: () => { navShowAllPast = true; renderNavEvents(); },
+    onItemClick: (id) => selectEventFilter(id),
+    isActive: (id) => viewMode === 'event' && eventFilterIds.has(id)
+  });
+}
+
+function renderSportsEventList(){
+  if(!els.sportsEventListPlanned || !els.sportsEventListPast) return;
+  renderEventListInto({
+    plannedContainer: els.sportsEventListPlanned,
+    pastContainer: els.sportsEventListPast,
+    query: modalEventsQuery,
+    showAllPast: modalShowAllPast,
+    onToggleShowAll: () => { modalShowAllPast = true; renderSportsEventList(); },
+    onItemClick: (id) => selectEvent(id),
+    isActive: (id) => selectedEventId === id
+  });
 }
 
 function updateMapModeUI(){
   const inEventMode = viewMode === 'event' && eventFilterIds.size > 0;
+  const inTimelineMode = !inEventMode && mapColorMode === 'tidslinje';
   els.mapModeSwitch.style.display = inEventMode ? 'none' : 'flex';
-  els.legendNormal.style.display = inEventMode ? 'none' : 'flex';
+  els.legendNormal.style.display = (inEventMode || inTimelineMode) ? 'none' : 'flex';
   els.legendEvent.style.display = inEventMode ? 'flex' : 'none';
+  els.legendTimeline.style.display = inTimelineMode ? 'flex' : 'none';
+  els.timelineControls.style.display = inTimelineMode ? 'block' : 'none';
 }
 
 function renderNavTree(){
@@ -2157,9 +2465,11 @@ function renderList(){
               ? 'Ingen ikke-medlemmer registreret endnu.'
               : (viewMode === 'sport-all'
                 ? 'Ingen væresteder har deltaget i en sportsbegivenhed endnu.'
-                : (viewMode === 'event'
-                  ? 'Ingen væresteder tilmeldt denne begivenhed endnu.'
-                  : 'Ingen væresteder oprettet endnu — opret det første.')))))
+                : (viewMode === 'former-members'
+                  ? 'Ingen tidligere medlemmer registreret.'
+                  : (viewMode === 'event'
+                    ? 'Ingen væresteder tilmeldt denne begivenhed endnu.'
+                    : 'Ingen væresteder oprettet endnu — opret det første.'))))))
       }</div>
     </div>`;
     return;
@@ -2177,6 +2487,10 @@ function renderList(){
         <div class="vc-badge ${v.medlem?'member':'nonmember'}">${v.medlem?'Medlem':'Ikke medlem'}</div>
       </div>
       <div class="vc-meta">${escapeHtml(v.type || 'Type ikke angivet')} · ${escapeHtml(v.tilknytning || 'Ukendt tilknytning')}</div>
+      ${(v.status === 'Lukket' || (v.tidligereMedlem && !v.medlem)) ? `<div class="vc-tags">
+        ${v.status === 'Lukket' ? '<span class="vc-tag vc-tag-closed">Lukket</span>' : ''}
+        ${(v.tidligereMedlem && !v.medlem) ? '<span class="vc-tag vc-tag-former">Tidligere medlem</span>' : ''}
+      </div>` : ''}
       ${(searchQuery) ? `<div class="vc-kommune">${escapeHtml(v.kommuneName||'')}</div>` : ''}
       ${mySignups.length > 0 ? `<div class="vc-kommune">🏅 ${signupTotal} bruger${signupTotal===1?'':'e'} tilmeldt (${mySignups.length} begivenhed${mySignups.length===1?'':'er'})</div>` : ''}
     `;
@@ -2240,12 +2554,27 @@ function populateKommuneSelect(){
   els.f_kommune.innerHTML = sorted.map(m => `<option value="${m.code}">${m.name}</option>`).join('');
 }
 
+function switchVenueTab(tab){
+  els.venueModalTabs.querySelectorAll('.modal-tab').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.tab === tab);
+  });
+  document.getElementById('venueTabGenerelt').style.display = tab === 'generelt' ? 'block' : 'none';
+  document.getElementById('venueTabDetaljer').style.display = tab === 'detaljer' ? 'block' : 'none';
+  document.getElementById('venueTabNote').style.display = tab === 'note' ? 'block' : 'none';
+}
+els.venueModalTabs.addEventListener('click', (e) => {
+  const btn = e.target.closest('.modal-tab');
+  if(!btn) return;
+  switchVenueTab(btn.dataset.tab);
+});
+
 function openVenueModal(id){
   editingVenueId = id || null;
   const v = id ? db.vaerested.find(x=>x.id===id) : null;
   els.venueModalTitle.textContent = v ? 'Rediger værested' : 'Nyt værested';
   els.deleteVenueBtn.style.display = v ? 'block' : 'none';
   els.showVenueEventsBtn.style.display = v ? 'flex' : 'none';
+  switchVenueTab('generelt');
   populateKommuneSelect();
 
   els.f_navn.value = v ? v.navn : '';
@@ -2258,6 +2587,10 @@ function openVenueModal(id){
   els.f_tilknytning.value = v && v.tilknytning ? v.tilknytning : 'Offentligt';
   els.f_ansatte.value = v ? (v.antalAnsatte || '') : '';
   els.f_frivillige.value = v ? (v.antalFrivillige || '') : '';
+  els.f_medlem_siden.value = v ? (v.medlemSiden || '') : '';
+  els.f_status.value = v ? (v.status || 'Aktiv') : 'Aktiv';
+  els.f_status.disabled = !isSuperuser;
+  els.statusSuperuserHint.style.display = isSuperuser ? 'none' : 'inline';
   setFinansieringValue(v ? (v.finansiering || '') : '');
   els.memberToggle.checked = v ? !!v.medlem : true;
   els.kontingentToggle.checked = v ? !!v.kontingentBetalt : false;
@@ -2265,6 +2598,7 @@ function openVenueModal(id){
   updateKontingentVisibility();
   updateKontingentLabel();
   updateModalHeadColor();
+  els.formerMemberBanner.style.display = (v && v.tidligereMedlem && !v.medlem) ? 'block' : 'none';
 
   els.venueOverlay.classList.add('open');
 }
@@ -2325,6 +2659,17 @@ els.saveVenueBtn.addEventListener('click', async ()=>{
   if(!navn){ showToast('Værestedet skal have et navn'); return; }
   const kommuneCode = els.f_kommune.value;
   const kommuneObj = MAP_DATA.municipalities.find(m=>m.code===kommuneCode);
+  const existing = editingVenueId ? db.vaerested.find(x=>x.id===editingVenueId) : null;
+  const newMedlem = els.memberToggle.checked;
+
+  // Automatisk "tidligere medlem"-markering: sættes når et medlem melder sig ud,
+  // og skjules igen automatisk hvis værestedet bliver medlem på ny.
+  let tidligereMedlem = existing ? !!existing.tidligereMedlem : false;
+  if(existing){
+    if(existing.medlem && !newMedlem) tidligereMedlem = true;
+    else if(!existing.medlem && newMedlem) tidligereMedlem = false;
+  }
+
   const payload = {
     navn,
     adresse: els.f_adresse.value.trim(),
@@ -2335,11 +2680,14 @@ els.saveVenueBtn.addEventListener('click', async ()=>{
     type: els.f_type.value.trim(),
     tilknytning: els.f_tilknytning.value,
     note: els.f_note.value.trim(),
-    medlem: els.memberToggle.checked,
-    kontingentBetalt: els.memberToggle.checked ? els.kontingentToggle.checked : false,
+    medlem: newMedlem,
+    kontingentBetalt: newMedlem ? els.kontingentToggle.checked : false,
     finansiering: getFinansieringValue(),
     antalAnsatte: els.f_ansatte.value,
-    antalFrivillige: els.f_frivillige.value
+    antalFrivillige: els.f_frivillige.value,
+    medlemSiden: els.f_medlem_siden.value,
+    tidligereMedlem,
+    status: isSuperuser ? els.f_status.value : (existing ? existing.status : 'Aktiv')
   };
   const row = venueToRow(payload);
   if(editingVenueId){
@@ -2565,6 +2913,9 @@ function formatEventTidShort(tid){
 function openSportsModal(){
   selectedEventId = null;
   editingEventId = null;
+  modalEventsQuery = '';
+  modalShowAllPast = false;
+  els.sportsEventSearch.value = '';
   renderSportsEventList();
   els.sportsDetailPane.innerHTML = '<div class="empty-hint">Vælg en begivenhed i listen, eller opret en ny.</div>';
   els.sportsOverlay.classList.add('open');
@@ -2572,31 +2923,14 @@ function openSportsModal(){
 els.openSportsBtn.addEventListener('click', openSportsModal);
 els.sportsModalClose.addEventListener('click', () => els.sportsOverlay.classList.remove('open'));
 els.sportsOverlay.addEventListener('click', (e) => { if(e.target === els.sportsOverlay) els.sportsOverlay.classList.remove('open'); });
-
-function renderSportsEventList(){
-  const list = db.events.slice().sort((a,b) => {
-    if(a.tid && b.tid) return new Date(b.tid) - new Date(a.tid);
-    if(a.tid) return -1;
-    if(b.tid) return 1;
-    return a.navn.localeCompare(b.navn, 'da');
-  });
-  els.sportsEventList.innerHTML = '';
-  if(list.length === 0){
-    els.sportsEventList.innerHTML = '<div class="empty-hint">Ingen begivenheder oprettet endnu.</div>';
-    return;
-  }
-  list.forEach(ev => {
-    const item = document.createElement('div');
-    item.className = 'sports-event-item' + (selectedEventId === ev.id ? ' active' : '');
-    const signupCount = db.signups.filter(s => s.eventId === ev.id).length;
-    item.innerHTML = `
-      <div class="se-name">${escapeHtml(ev.navn)}</div>
-      <div class="se-meta">${escapeHtml(formatEventTidShort(ev.tid))} · ${signupCount} værested${signupCount===1?'':'er'}</div>
-    `;
-    item.addEventListener('click', () => selectEvent(ev.id));
-    els.sportsEventList.appendChild(item);
-  });
-}
+els.sportsEventSearch.addEventListener('input', (e) => {
+  modalEventsQuery = e.target.value;
+  renderSportsEventList();
+});
+els.navEventsSearch.addEventListener('input', (e) => {
+  navEventsQuery = e.target.value;
+  renderNavEvents();
+});
 
 function selectEvent(id){
   selectedEventId = id;
@@ -2755,7 +3089,7 @@ async function addSignup(){
     antal_brugere: antal
   }, { onConflict: 'event_id,vaerested_id' });
   if(error){ showToast('Kunne ikke tilmelde værested'); console.error(error); return; }
-  await loadDB();
+  await reloadSignups();
   selectEvent(selectedEventId);
   showToast('Værested tilmeldt');
 }
@@ -2764,7 +3098,7 @@ async function removeSignup(id){
   if(!confirm('Fjern denne tilmelding?')) return;
   const { error } = await sb.from('tilmeldinger').delete().eq('id', id);
   if(error){ showToast('Kunne ikke fjerne tilmelding'); console.error(error); return; }
-  await loadDB();
+  await reloadSignups();
   selectEvent(selectedEventId);
 }
 
@@ -2832,7 +3166,7 @@ async function saveEventForm(){
     if(error){ showToast('Kunne ikke oprette begivenhed'); console.error(error); return; }
     editingEventId = data.id;
   }
-  await loadDB();
+  await reloadEvents();
   selectEvent(editingEventId);
   showToast('Begivenhed gemt');
 }
@@ -2843,7 +3177,7 @@ async function deleteEvent(id){
   const { error } = await sb.from('sportsbegivenheder').delete().eq('id', id);
   if(error){ showToast('Kunne ikke slette begivenhed'); console.error(error); return; }
   selectedEventId = null;
-  await loadDB();
+  await reloadEvents();
   renderSportsEventList();
   els.sportsDetailPane.innerHTML = '<div class="empty-hint">Vælg en begivenhed i listen, eller opret en ny.</div>';
   showToast('Begivenhed slettet');
@@ -2882,7 +3216,7 @@ async function unsubscribeFromVenueView(signupId, venueId){
   if(!confirm('Afmeld denne tilmelding?')) return;
   const { error } = await sb.from('tilmeldinger').delete().eq('id', signupId);
   if(error){ showToast('Kunne ikke afmelde'); console.error(error); return; }
-  await loadDB();
+  await reloadSignups();
   openVenueEventsModal(venueId);
   showToast('Tilmelding afmeldt');
 }
@@ -2897,8 +3231,54 @@ const LEGEND_TEXT = {
 };
 els.mapModeSelect.addEventListener('change', () => {
   mapColorMode = els.mapModeSelect.value;
-  els.legendModeText.textContent = LEGEND_TEXT[mapColorMode];
+  if(LEGEND_TEXT[mapColorMode]) els.legendModeText.textContent = LEGEND_TEXT[mapColorMode];
+  if(mapColorMode === 'tidslinje'){
+    els.timelineSlider.min = TIMELINE_MIN_YEAR;
+    els.timelineSlider.max = TIMELINE_MAX_YEAR;
+    els.timelineSlider.value = timelineYear;
+    els.timelineYearLabel.textContent = timelineYear;
+  } else {
+    stopTimelinePlayback();
+  }
+  updateMapModeUI();
   renderMap();
+});
+
+// ---------- TIDSLINJE-KONTROLLER ----------
+els.timelineSlider.addEventListener('input', () => {
+  timelineYear = parseInt(els.timelineSlider.value, 10);
+  els.timelineYearLabel.textContent = timelineYear;
+  renderMap();
+});
+
+function stopTimelinePlayback(){
+  timelinePlaying = false;
+  if(timelineIntervalId){ clearInterval(timelineIntervalId); timelineIntervalId = null; }
+  els.timelinePlayBtn.textContent = '▶';
+  els.timelinePlayBtn.classList.remove('playing');
+}
+
+function startTimelinePlayback(){
+  timelinePlaying = true;
+  els.timelinePlayBtn.textContent = '⏸';
+  els.timelinePlayBtn.classList.add('playing');
+  // start forfra hvis vi allerede er nået til slutningen
+  if(timelineYear >= TIMELINE_MAX_YEAR) timelineYear = TIMELINE_MIN_YEAR;
+  timelineIntervalId = setInterval(() => {
+    timelineYear += 1;
+    if(timelineYear > TIMELINE_MAX_YEAR){
+      timelineYear = TIMELINE_MAX_YEAR;
+      stopTimelinePlayback();
+    }
+    els.timelineSlider.value = timelineYear;
+    els.timelineYearLabel.textContent = timelineYear;
+    renderMap();
+  }, 900);
+}
+
+els.timelinePlayBtn.addEventListener('click', () => {
+  if(timelinePlaying) stopTimelinePlayback();
+  else startTimelinePlayback();
 });
 
 // ---------- NAV-FANER (Væresteder / Sportsbegivenheder) ----------

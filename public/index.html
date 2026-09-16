@@ -1238,7 +1238,7 @@
 
       <div class="nav-tab-content" id="navEventsTab" style="display:none;">
         <div class="nav-events-search-wrap">
-          <input type="text" id="navEventsSearch" class="sports-search-input" placeholder="Søg begivenhed, by…" autocomplete="off">
+          <input type="text" id="navEventsSearch" class="sports-search-input" placeholder="Søg begivenhed, kommune…" autocomplete="off">
         </div>
         <div class="nav-divider"><span>Planlagte</span></div>
         <div class="nav-events-list" id="navEventsPlanned"></div>
@@ -1546,7 +1546,7 @@
     <div class="modal-body sports-body">
       <div class="sports-list-pane">
         <button class="btn btn-primary" id="newEventBtn">+ Ny begivenhed</button>
-        <input type="text" id="sportsEventSearch" class="sports-search-input" placeholder="Søg begivenhed, by…" autocomplete="off">
+        <input type="text" id="sportsEventSearch" class="sports-search-input" placeholder="Søg begivenhed, kommune…" autocomplete="off">
         <div class="nav-divider" style="padding-left:0;"><span>Planlagte</span></div>
         <div class="sports-event-list" id="sportsEventListPlanned"></div>
         <div class="nav-divider" style="padding-left:0;"><span>Afholdte</span></div>
@@ -2351,7 +2351,7 @@ function renderEventListInto({ plannedContainer, pastContainer, query, showAllPa
       item.className = 'nav-event-item' + (isActive(ev.id) ? ' active' : '');
       item.innerHTML = `
         <span class="ne-name">${escapeHtml(ev.navn)}</span>
-        <span class="ne-meta">${escapeHtml(formatEventTidShort(ev.tid))}${ev.sted ? ' · ' + escapeHtml(ev.sted) : ''} · ${count} værested${count===1?'':'er'}</span>
+        <span class="ne-meta">${escapeHtml(formatEventTidShort(ev.tid))}${ev.kommuneName ? ' · ' + escapeHtml(ev.kommuneName) : ''} · ${count} værested${count===1?'':'er'}</span>
       `;
       item.addEventListener('click', () => onItemClick(ev.id));
       container.appendChild(item);
@@ -2967,7 +2967,7 @@ function renderEventDetail(){
         <button id="sdDeleteBtn" title="Slet">✕</button>
       </div>
     </div>
-    <div class="sd-meta">📍 ${escapeHtml(ev.sted || 'By ikke angivet')}${ev.kommuneName ? ' · ' + escapeHtml(ev.kommuneName) + ' Kommune' : ''}</div>
+    <div class="sd-meta">📍 ${escapeHtml(ev.sted || 'Sted ikke angivet')}${ev.kommuneName ? ' · ' + escapeHtml(ev.kommuneName) + ' Kommune' : ''}</div>
     <div class="sd-meta">🕒 ${escapeHtml(formatEventTid(ev.tid))}</div>
     ${ev.noter ? `<div class="sd-noter">${escapeHtml(ev.noter)}</div>` : ''}
 
@@ -3115,8 +3115,8 @@ function openEventForm(ev){
       <input type="text" id="ef_navn" placeholder="F.eks. Sport for Livet" value="${ev ? escapeHtml(ev.navn) : ''}">
     </div>
     <div class="field">
-      <label for="ef_sted">By</label>
-      <input type="text" id="ef_sted" placeholder="F.eks. Odense" value="${ev ? escapeHtml(ev.sted) : ''}">
+      <label for="ef_sted">Sted</label>
+      <input type="text" id="ef_sted" placeholder="F.eks. Idrætscenter Vest, Vestergade 1, 5000 Odense C" value="${ev ? escapeHtml(ev.sted) : ''}">
     </div>
     <div class="field">
       <label for="ef_kommune">Kommune</label>
@@ -3202,7 +3202,7 @@ function openVenueEventsModal(venueId){
         card.className = 'venue-event-card';
         card.innerHTML = `
           <div class="vec-name">${escapeHtml(ev.navn)}</div>
-          <div class="vec-meta">📍 ${escapeHtml(ev.sted || 'By ikke angivet')} · 🕒 ${escapeHtml(formatEventTid(ev.tid))}</div>
+          <div class="vec-meta">📍 ${escapeHtml(ev.sted || 'Sted ikke angivet')} · 🕒 ${escapeHtml(formatEventTid(ev.tid))}</div>
           <div class="vec-count">${s.antalBrugere} bruger${s.antalBrugere===1?'':'e'} tilmeldt</div>
           <button class="btn btn-danger btn-sm vec-unsubscribe" style="width:100%;margin-top:8px;">Afmeld</button>
         `;
@@ -3324,7 +3324,7 @@ function buildSignupRows(){
       'Begivenhed': ev.navn,
       'Dato': ev.tid ? formatEventTid(ev.tid) : '',
       'Afholdes i kommune': ev.kommuneName || '',
-      'By': ev.sted || '',
+      'Sted': ev.sted || '',
       'Værested': v.navn,
       'Værestedets kommune': v.kommuneName || '',
       'Antal brugere': s.antalBrugere

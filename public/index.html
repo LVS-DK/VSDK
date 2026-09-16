@@ -369,15 +369,16 @@
     fill:var(--paper);
     stroke:var(--line);
     stroke-width:1;
+    vector-effect:non-scaling-stroke;
   }
   .inset-frame-top{
     fill:none;
     stroke:var(--select);
     stroke-width:1.5;
+    vector-effect:non-scaling-stroke;
   }
   .inset-title{
     font-family:'Inter',sans-serif;
-    font-size:15px;
     font-weight:700;
     fill:var(--ink-soft);
     text-anchor:middle;
@@ -1230,12 +1231,14 @@
       </div>
     </div>
     <div class="map-pane">
-      <svg id="dkMap" viewBox="0 0 980 950" preserveAspectRatio="xMidYMid meet">
-        <g id="mapGroup"></g>
-        <rect id="insetFrame" class="inset-frame" rx="12"></rect>
-        <g id="insetGroup"></g>
-        <rect id="insetFrameTop" class="inset-frame-top" rx="12" pointer-events="none"></rect>
-        <text id="insetTitle" class="inset-title" pointer-events="none">Hovedstadsområdet (udsnit)</text>
+      <svg id="dkMap" viewBox="0 0 780 950" preserveAspectRatio="xMidYMid meet">
+        <g id="mapZoomGroup">
+          <g id="mapGroup"></g>
+          <rect id="insetFrame" class="inset-frame" rx="8"></rect>
+          <g id="insetGroup"></g>
+          <rect id="insetFrameTop" class="inset-frame-top" rx="8" pointer-events="none"></rect>
+          <text id="insetTitle" class="inset-title" pointer-events="none">Hovedstadsområdet (udsnit)</text>
+        </g>
       </svg>
       <div class="map-tooltip" id="mapTooltip"><div class="t-name"></div><div class="t-sub"></div></div>
       <div class="map-mode-switch" id="mapModeSwitch">
@@ -1898,13 +1901,17 @@ function renderMap(){
   renderInset(matchSet);
 }
 
-// Fast hovedstads-udsnit i det tomme havområde nordøst for Sjælland (SVG-koordinater)
-const INSET_BOX = { x: 505, y: 12, w: 462, h: 450 };
+// Fast hovedstads-udsnit i det tomme havområde nordøst for Sjælland (SVG-koordinater).
+// Ligger i samme zoom-gruppe som kortet, så det zoomes og panoreres sammen med resten.
+const INSET_BOX = { x: 495, y: 12, w: 277, h: 270 };
 // Udstrækning af INSET_DATA.large-stierne, som skaleres ind i boksen
 const INSET_SRC = { x: 422, y: 90, w: 308, h: 260 };
-const INSET_TITLE_SPACE = 30;
-const INSET_PADDING = 18;
-const INSET_LABEL_SIZE = 11;
+const INSET_TITLE_SPACE = 18;
+const INSET_PADDING = 11;
+const INSET_LABEL_SIZE = 7;
+const INSET_TITLE_SIZE = 9;
+
+let insetContentScale = 1;
 
 function renderInset(matchSet){
   const data = INSET_DATA.large;
@@ -1919,7 +1926,7 @@ function renderInset(matchSet){
     r.setAttribute('height', b.h);
   });
   els.insetTitle.setAttribute('x', b.x + b.w / 2);
-  els.insetTitle.setAttribute('y', b.y + 22);
+  els.insetTitle.setAttribute('y', b.y + 14);
 
   const availW = b.w - 2 * INSET_PADDING;
   const availH = b.h - 2 * INSET_PADDING - INSET_TITLE_SPACE;
@@ -1928,7 +1935,7 @@ function renderInset(matchSet){
   const ty = b.y + INSET_TITLE_SPACE + INSET_PADDING + (availH - INSET_SRC.h * scale) / 2 - INSET_SRC.y * scale;
   group.setAttribute('transform', `translate(${tx},${ty}) scale(${scale})`);
 
-  const labelSize = INSET_LABEL_SIZE / scale;
+  insetContentScale = scale;
 
   data.municipalities.forEach(m => {
     const path = document.createElementNS('http://www.w3.org/2000/svg','path');
@@ -1939,7 +1946,7 @@ function renderInset(matchSet){
     if(viewMode === 'kommune' && selectedKommune && selectedKommune.code === m.code) cls += ' selected';
     else if(searchQuery && matchSet && matchSet.has(m.code)) cls += ' match';
     path.setAttribute('class', cls);
-    path.addEventListener('click', () => selectKommune(m.code, m.name));
+    path.addEventListener('click', () => { if(!mapDidDrag) selectKommune(m.code, m.name); });
     path.addEventListener('mousemove', (e) => showMapTooltip(e, m));
     path.addEventListener('mouseleave', hideMapTooltip);
     group.appendChild(path);
@@ -1949,10 +1956,10 @@ function renderInset(matchSet){
     label.setAttribute('x', m.cx);
     label.setAttribute('y', m.cy);
     label.setAttribute('class', 'kommune-label');
-    label.setAttribute('font-size', labelSize);
     label.textContent = m.name;
     group.appendChild(label);
   });
+  updateLabelFontSizes();
 }
 
 function showMapTooltip(e, m){
@@ -2005,7 +2012,7 @@ const BASE_LABEL_SIZE = 8.5;
 const LABEL_GROWTH_CAP = 2.2; // teksten må vokse indtil zoom~2.2x, derefter fastholdes den
 
 function applyMapTransform(){
-  document.getElementById('mapGroup').setAttribute('transform',
+  document.getElementById('mapZoomGroup').setAttribute('transform',
     `translate(${mapTransform.x},${mapTransform.y}) scale(${mapTransform.scale})`);
 }
 
@@ -2015,6 +2022,11 @@ function updateLabelFontSizes(){
   document.querySelectorAll('#mapGroup .kommune-label').forEach(label => {
     label.setAttribute('font-size', fontSize);
   });
+  const insetFontSize = INSET_LABEL_SIZE / effectiveScale / insetContentScale;
+  document.querySelectorAll('#insetGroup .kommune-label').forEach(label => {
+    label.setAttribute('font-size', insetFontSize);
+  });
+  els.insetTitle.setAttribute('font-size', INSET_TITLE_SIZE / effectiveScale);
 }
 
 function svgPoint(evt){
@@ -2041,7 +2053,7 @@ function zoomAt(clientPoint, factor){
 
 function clampPan(){
   // undgå at panorere kortet helt ud af syne
-  const maxOffsetX = 980 * (mapTransform.scale - 1) + 200;
+  const maxOffsetX = 780 * (mapTransform.scale - 1) + 200;
   const maxOffsetY = 950 * (mapTransform.scale - 1) + 200;
   mapTransform.x = Math.min(maxOffsetX, Math.max(-maxOffsetX, mapTransform.x));
   mapTransform.y = Math.min(maxOffsetY, Math.max(-maxOffsetY, mapTransform.y));

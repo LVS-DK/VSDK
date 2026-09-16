@@ -377,28 +377,11 @@
   }
   .inset-title{
     font-family:'Inter',sans-serif;
-    font-size:11px;
+    font-size:15px;
     font-weight:700;
     fill:var(--ink-soft);
     text-anchor:middle;
     letter-spacing:.02em;
-  }
-  .inset-toggle-btn{ cursor:pointer; }
-  .inset-toggle-btn circle{
-    fill:var(--paper);
-    stroke:var(--select);
-    stroke-width:1.5;
-    vector-effect:non-scaling-stroke;
-  }
-  .inset-toggle-btn:hover circle{ fill:var(--select-glow); }
-  .inset-toggle-btn text{
-    font-family:'Inter',sans-serif;
-    font-size:14px;
-    font-weight:700;
-    fill:var(--ink);
-    text-anchor:middle;
-    dominant-baseline:middle;
-    user-select:none;
   }
   #insetGroup .kommune-shape{ vector-effect:non-scaling-stroke; }
   .kommune-label{
@@ -1247,23 +1230,12 @@
       </div>
     </div>
     <div class="map-pane">
-      <svg id="dkMap" viewBox="0 0 780 950" preserveAspectRatio="xMidYMid meet">
-        <defs>
-          <clipPath id="insetClip">
-            <circle id="insetClipCircle" cx="650" cy="290" r="95"></circle>
-          </clipPath>
-        </defs>
+      <svg id="dkMap" viewBox="0 0 980 950" preserveAspectRatio="xMidYMid meet">
         <g id="mapGroup"></g>
-        <g id="insetOverlay" pointer-events="none">
-          <circle id="insetFrame" cx="650" cy="290" r="97" class="inset-frame"></circle>
-        </g>
-        <g id="insetGroup" clip-path="url(#insetClip)"></g>
-        <circle id="insetFrameTop" cx="650" cy="290" r="97" class="inset-frame-top" pointer-events="none"></circle>
-        <text id="insetTitle" x="650" y="184" class="inset-title" pointer-events="none">Hovedstadsområdet (udsnit)</text>
-        <g id="insetToggleBtn" class="inset-toggle-btn" transform="translate(728,368)">
-          <circle r="12"></circle>
-          <text x="0" y="1">+</text>
-        </g>
+        <rect id="insetFrame" class="inset-frame" rx="12"></rect>
+        <g id="insetGroup"></g>
+        <rect id="insetFrameTop" class="inset-frame-top" rx="12" pointer-events="none"></rect>
+        <text id="insetTitle" class="inset-title" pointer-events="none">Hovedstadsområdet (udsnit)</text>
       </svg>
       <div class="map-tooltip" id="mapTooltip"><div class="t-name"></div><div class="t-sub"></div></div>
       <div class="map-mode-switch" id="mapModeSwitch">
@@ -1643,7 +1615,7 @@ const els = {};
 ["navTabs","navVenuesTab","navEventsTab","navQuick","navTree","navEventsPlanned","navEventsPast","navEventsSearch","nqAllCount","nqMemberCount","nqNonmemberCount","nqSportCount","nqFormerCount",
  "mapModeSwitch","legendNormal","legendEvent","legendTimeline",
  "timelineControls","timelinePlayBtn","timelineYearLabel","timelineSlider",
- "zoomInBtn","zoomOutBtn","zoomResetBtn","mapModeSelect","legendModeText","insetFrame","insetFrameTop","insetTitle","insetToggleBtn",
+ "zoomInBtn","zoomOutBtn","zoomResetBtn","mapModeSelect","legendModeText","insetFrame","insetFrameTop","insetTitle",
  "searchInput","searchClear","newVenueBtn","dkMap","mapTooltip","statTotal","statMember","statNonmember",
  "shName","shClearBtn","shCount","shActions","byraadBtn","listScroll","scopeBanner",
  "venueOverlay","venueModalTitle","venueModalClose","venueModalHead","venueModalTabs","toggleStatusLabel","memberToggle",
@@ -1926,30 +1898,37 @@ function renderMap(){
   renderInset(matchSet);
 }
 
-let insetSize = 'small'; // 'small' | 'large'
+// Fast hovedstads-udsnit i det tomme havområde nordøst for Sjælland (SVG-koordinater)
+const INSET_BOX = { x: 505, y: 12, w: 462, h: 450 };
+// Udstrækning af INSET_DATA.large-stierne, som skaleres ind i boksen
+const INSET_SRC = { x: 422, y: 90, w: 308, h: 260 };
+const INSET_TITLE_SPACE = 30;
+const INSET_PADDING = 18;
+const INSET_LABEL_SIZE = 11;
 
 function renderInset(matchSet){
-  const data = INSET_DATA[insetSize];
+  const data = INSET_DATA.large;
   const group = document.getElementById('insetGroup');
   group.innerHTML = '';
 
-  // opdater ramme og klip til den aktuelle radius
-  const clipCircle = document.getElementById('insetClipCircle');
-  clipCircle.setAttribute('cx', data.cx);
-  clipCircle.setAttribute('cy', data.cy);
-  clipCircle.setAttribute('r', data.r);
-  els.insetFrame.setAttribute('cx', data.cx);
-  els.insetFrame.setAttribute('cy', data.cy);
-  els.insetFrame.setAttribute('r', data.r + 2);
-  els.insetFrameTop.setAttribute('cx', data.cx);
-  els.insetFrameTop.setAttribute('cy', data.cy);
-  els.insetFrameTop.setAttribute('r', data.r + 2);
-  els.insetToggleBtn.setAttribute('transform', `translate(${data.cx + (data.r+15) * 0.7071}, ${data.cy + (data.r+15) * 0.7071})`);
-  els.insetToggleBtn.querySelector('text').textContent = insetSize === 'small' ? '+' : '−';
-  els.insetTitle.setAttribute('x', data.cx);
-  els.insetTitle.setAttribute('y', data.cy - data.r - 12);
+  const b = INSET_BOX;
+  [els.insetFrame, els.insetFrameTop].forEach(r => {
+    r.setAttribute('x', b.x);
+    r.setAttribute('y', b.y);
+    r.setAttribute('width', b.w);
+    r.setAttribute('height', b.h);
+  });
+  els.insetTitle.setAttribute('x', b.x + b.w / 2);
+  els.insetTitle.setAttribute('y', b.y + 22);
 
-  const labelSize = insetSize === 'small' ? 6.2 : 10.5;
+  const availW = b.w - 2 * INSET_PADDING;
+  const availH = b.h - 2 * INSET_PADDING - INSET_TITLE_SPACE;
+  const scale = Math.min(availW / INSET_SRC.w, availH / INSET_SRC.h);
+  const tx = b.x + (b.w - INSET_SRC.w * scale) / 2 - INSET_SRC.x * scale;
+  const ty = b.y + INSET_TITLE_SPACE + INSET_PADDING + (availH - INSET_SRC.h * scale) / 2 - INSET_SRC.y * scale;
+  group.setAttribute('transform', `translate(${tx},${ty}) scale(${scale})`);
+
+  const labelSize = INSET_LABEL_SIZE / scale;
 
   data.municipalities.forEach(m => {
     const path = document.createElementNS('http://www.w3.org/2000/svg','path');
@@ -1974,11 +1953,6 @@ function renderInset(matchSet){
     label.textContent = m.name;
     group.appendChild(label);
   });
-}
-
-function toggleInsetSize(){
-  insetSize = insetSize === 'small' ? 'large' : 'small';
-  renderInset(getSearchMatchKommuneCodes());
 }
 
 function showMapTooltip(e, m){
@@ -2067,7 +2041,7 @@ function zoomAt(clientPoint, factor){
 
 function clampPan(){
   // undgå at panorere kortet helt ud af syne
-  const maxOffsetX = 780 * (mapTransform.scale - 1) + 200;
+  const maxOffsetX = 980 * (mapTransform.scale - 1) + 200;
   const maxOffsetY = 950 * (mapTransform.scale - 1) + 200;
   mapTransform.x = Math.min(maxOffsetX, Math.max(-maxOffsetX, mapTransform.x));
   mapTransform.y = Math.min(maxOffsetY, Math.max(-maxOffsetY, mapTransform.y));
@@ -3492,7 +3466,6 @@ els.refreshBtn.addEventListener('click', async () => {
 
 // ---------- INIT ----------
 initMapZoomPan();
-els.insetToggleBtn.addEventListener('click', toggleInsetSize);
 loadDB();
 subscribeRealtime();
 </script>

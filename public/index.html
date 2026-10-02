@@ -910,6 +910,23 @@
   .field-row{display:flex;gap:10px;}
   .field-row .field{flex:1;}
 
+  .kontakt-group{
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:14px 14px 2px 14px;
+    margin-bottom:14px;
+    background:var(--panel);
+  }
+  .kontakt-group-title{
+    font-size:12px;
+    font-weight:700;
+    text-transform:uppercase;
+    letter-spacing:.06em;
+    color:var(--ink-soft);
+    margin-bottom:10px;
+  }
+  .kontakt-group .field textarea{min-height:60px;}
+
   .toggle-row{
     display:flex;
     align-items:center;
@@ -1359,6 +1376,7 @@
       <div class="modal-tabs" id="venueModalTabs">
         <button class="modal-tab active" data-tab="generelt">Generelt</button>
         <button class="modal-tab" data-tab="detaljer">Detaljer</button>
+        <button class="modal-tab" data-tab="kontakt">Kontaktoplysninger</button>
         <button class="modal-tab" data-tab="note">Note</button>
       </div>
 
@@ -1388,7 +1406,8 @@
       </div>
 
       <div class="modal-tab-content" id="venueTabDetaljer" style="display:none;">
-        <div class="field">
+        <!-- Status er slået fra i brugerfladen, men feltet og de gemte værdier bliver i systemet. -->
+        <div class="field" id="statusField" style="display:none;">
           <label for="f_status">Status <span id="statusSuperuserHint" style="display:none;font-weight:400;text-transform:none;letter-spacing:0;color:var(--ink-soft);">(kun superbruger kan ændre)</span></label>
           <select id="f_status">
             <option value="Aktiv">Aktiv</option>
@@ -1408,10 +1427,13 @@
           </select>
         </div>
         <div class="field">
-          <label>Finansiering</label>
-          <label class="checkbox-row"><input type="checkbox" id="f_fin_offentlig" name="finansiering"> Offentlig</label>
-          <label class="checkbox-row"><input type="checkbox" id="f_fin_privat" name="finansiering"> Privat</label>
-          <label class="checkbox-row"><input type="checkbox" id="f_fin_delvist" name="finansiering"> Delvist offentligt tilskud</label>
+          <label for="f_finansiering">Finansiering</label>
+          <select id="f_finansiering">
+            <option value="">Ikke angivet</option>
+            <option value="Offentlig">Offentlig</option>
+            <option value="Privat">Privat</option>
+            <option value="Delvist offentligt tilskud">Delvist offentligt tilskud</option>
+          </select>
         </div>
         <div class="field-row">
           <div class="field">
@@ -1433,6 +1455,65 @@
               <option value="7-10">7-10</option>
               <option value="10+">10+</option>
             </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-tab-content" id="venueTabKontakt" style="display:none;">
+        <div class="field">
+          <label for="f_foretrukken_kontakt">Foretrukken kontakt</label>
+          <select id="f_foretrukken_kontakt">
+            <option value="">Ikke angivet</option>
+            <option value="Leder">Leder</option>
+            <option value="Kontaktperson">Kontaktperson</option>
+          </select>
+        </div>
+
+        <div class="kontakt-group">
+          <div class="kontakt-group-title">Leder</div>
+          <div class="field">
+            <label for="f_leder_navn">Navn</label>
+            <input type="text" id="f_leder_navn" placeholder="F.eks. Hanne Jensen">
+          </div>
+          <div class="field-row">
+            <div class="field">
+              <label for="f_leder_telefon">Telefon</label>
+              <input type="text" id="f_leder_telefon" placeholder="12 34 56 78">
+            </div>
+            <div class="field">
+              <label for="f_leder_email">E-mail</label>
+              <input type="text" id="f_leder_email" placeholder="leder@sted.dk">
+            </div>
+          </div>
+          <div class="field">
+            <label for="f_leder_noter">Noter</label>
+            <textarea id="f_leder_noter" placeholder="F.eks. træffetider eller aftaler"></textarea>
+          </div>
+        </div>
+
+        <div class="kontakt-group">
+          <div class="kontakt-group-title">Kontaktperson</div>
+          <div class="field">
+            <label for="f_kontakt_navn">Navn</label>
+            <input type="text" id="f_kontakt_navn" placeholder="F.eks. Peter Madsen">
+          </div>
+          <div class="field">
+            <label for="f_kontakt_titel">Titel</label>
+            <input type="text" id="f_kontakt_titel" placeholder="F.eks. Souschef">
+          </div>
+          <div class="field-row">
+            <div class="field">
+              <label for="f_kontakt_telefon">Telefon</label>
+              <input type="text" id="f_kontakt_telefon" placeholder="12 34 56 78">
+            </div>
+            <div class="field">
+              <label for="f_kontakt_email">E-mail</label>
+              <input type="text" id="f_kontakt_email" placeholder="kontakt@sted.dk">
+            </div>
+          </div>
+          <div class="field">
+            <label for="f_kontakt_noter">Noter</label>
+            <textarea id="f_kontakt_noter" placeholder="F.eks. træffetider eller aftaler"></textarea>
           </div>
         </div>
       </div>
@@ -1624,7 +1705,10 @@ const els = {};
  "venueOverlay","venueModalTitle","venueModalClose","venueModalHead","venueModalTabs","toggleStatusLabel","memberToggle",
  "kontingentToggleRow","kontingentStatusLabel","kontingentToggle",
  "f_navn","f_adresse","f_kommune","f_telefon","f_email","f_type","f_tilknytning","f_note",
- "f_fin_offentlig","f_fin_privat","f_fin_delvist","f_ansatte","f_frivillige",
+ "f_finansiering","f_ansatte","f_frivillige",
+ "f_leder_navn","f_leder_telefon","f_leder_email","f_leder_noter",
+ "f_kontakt_navn","f_kontakt_titel","f_kontakt_telefon","f_kontakt_email","f_kontakt_noter",
+ "f_foretrukken_kontakt","statusField",
  "f_medlem_siden","medlemSidenField","formerMemberBanner","f_status","statusSuperuserHint",
  "deleteVenueBtn","saveVenueBtn",
  "kommuneOverlay","kommuneModalTitle","kommuneModalClose",
@@ -1657,7 +1741,17 @@ function rowToVenue(r){
     antalFrivillige: r.antal_frivillige || '',
     medlemSiden: r.medlem_siden || '',
     tidligereMedlem: !!r.tidligere_medlem,
-    status: r.status || 'Aktiv'
+    status: r.status || 'Aktiv',
+    lederNavn: r.leder_navn || '',
+    lederTelefon: r.leder_telefon || '',
+    lederEmail: r.leder_email || '',
+    lederNoter: r.leder_noter || '',
+    kontaktNavn: r.kontakt_navn || '',
+    kontaktTitel: r.kontakt_titel || '',
+    kontaktTelefon: r.kontakt_telefon || '',
+    kontaktEmail: r.kontakt_email || '',
+    kontaktNoter: r.kontakt_noter || '',
+    foretrukkenKontakt: r.foretrukken_kontakt || ''
   };
 }
 function venueToRow(v){
@@ -1678,7 +1772,17 @@ function venueToRow(v){
     antal_frivillige: v.antalFrivillige || null,
     medlem_siden: v.medlemSiden || null,
     tidligere_medlem: v.tidligereMedlem || false,
-    status: v.status || 'Aktiv'
+    status: v.status || 'Aktiv',
+    leder_navn: v.lederNavn || '',
+    leder_telefon: v.lederTelefon || '',
+    leder_email: v.lederEmail || '',
+    leder_noter: v.lederNoter || '',
+    kontakt_navn: v.kontaktNavn || '',
+    kontakt_titel: v.kontaktTitel || '',
+    kontakt_telefon: v.kontaktTelefon || '',
+    kontakt_email: v.kontaktEmail || '',
+    kontakt_noter: v.kontaktNoter || '',
+    foretrukken_kontakt: v.foretrukkenKontakt || ''
   };
 }
 
@@ -2546,6 +2650,7 @@ function switchVenueTab(tab){
   });
   document.getElementById('venueTabGenerelt').style.display = tab === 'generelt' ? 'block' : 'none';
   document.getElementById('venueTabDetaljer').style.display = tab === 'detaljer' ? 'block' : 'none';
+  document.getElementById('venueTabKontakt').style.display = tab === 'kontakt' ? 'block' : 'none';
   document.getElementById('venueTabNote').style.display = tab === 'note' ? 'block' : 'none';
 }
 els.venueModalTabs.addEventListener('click', (e) => {
@@ -2577,11 +2682,22 @@ function openVenueModal(id){
   els.f_status.value = v ? (v.status || 'Aktiv') : 'Aktiv';
   els.f_status.disabled = !isSuperuser;
   els.statusSuperuserHint.style.display = isSuperuser ? 'none' : 'inline';
-  setFinansieringValue(v ? (v.finansiering || '') : '');
+  els.f_finansiering.value = v ? (v.finansiering || '') : '';
+  els.f_leder_navn.value = v ? (v.lederNavn || '') : '';
+  els.f_leder_telefon.value = v ? (v.lederTelefon || '') : '';
+  els.f_leder_email.value = v ? (v.lederEmail || '') : '';
+  els.f_leder_noter.value = v ? (v.lederNoter || '') : '';
+  els.f_kontakt_navn.value = v ? (v.kontaktNavn || '') : '';
+  els.f_kontakt_titel.value = v ? (v.kontaktTitel || '') : '';
+  els.f_kontakt_telefon.value = v ? (v.kontaktTelefon || '') : '';
+  els.f_kontakt_email.value = v ? (v.kontaktEmail || '') : '';
+  els.f_kontakt_noter.value = v ? (v.kontaktNoter || '') : '';
+  els.f_foretrukken_kontakt.value = v ? (v.foretrukkenKontakt || '') : '';
   els.memberToggle.checked = v ? !!v.medlem : true;
   els.kontingentToggle.checked = v ? !!v.kontingentBetalt : false;
   updateToggleLabel();
   updateKontingentVisibility();
+  updateMedlemSidenVisibility();
   updateKontingentLabel();
   updateModalHeadColor();
   els.formerMemberBanner.style.display = (v && v.tidligereMedlem && !v.medlem) ? 'block' : 'none';
@@ -2590,32 +2706,16 @@ function openVenueModal(id){
 }
 function closeVenueModal(){ els.venueOverlay.classList.remove('open'); editingVenueId = null; }
 
-function setFinansieringValue(val){
-  els.f_fin_offentlig.checked = val === 'Offentlig';
-  els.f_fin_privat.checked = val === 'Privat';
-  els.f_fin_delvist.checked = val === 'Delvist offentligt tilskud';
-}
-function getFinansieringValue(){
-  if(els.f_fin_offentlig.checked) return 'Offentlig';
-  if(els.f_fin_privat.checked) return 'Privat';
-  if(els.f_fin_delvist.checked) return 'Delvist offentligt tilskud';
-  return '';
-}
-[els.f_fin_offentlig, els.f_fin_privat, els.f_fin_delvist].forEach(cb => {
-  cb.addEventListener('change', () => {
-    if(cb.checked){
-      [els.f_fin_offentlig, els.f_fin_privat, els.f_fin_delvist].forEach(other => {
-        if(other !== cb) other.checked = false;
-      });
-    }
-  });
-});
-
 function updateToggleLabel(){
   els.toggleStatusLabel.childNodes[0].textContent = els.memberToggle.checked ? 'Medlem' : 'Ikke medlem';
 }
 function updateKontingentVisibility(){
   els.kontingentToggleRow.style.display = els.memberToggle.checked ? 'flex' : 'none';
+}
+// "Medlem siden" vises kun for aktive medlemmer. Værdien bliver stående i feltet
+// og i databasen, så den dukker op igen, hvis værestedet melder sig ind på ny.
+function updateMedlemSidenVisibility(){
+  els.medlemSidenField.style.display = els.memberToggle.checked ? 'block' : 'none';
 }
 function updateKontingentLabel(){
   els.kontingentStatusLabel.childNodes[0].textContent = els.kontingentToggle.checked ? 'Kontingent betalt' : 'Kontingent ikke betalt';
@@ -2629,6 +2729,7 @@ function updateModalHeadColor(){
 els.memberToggle.addEventListener('change', () => {
   updateToggleLabel();
   updateKontingentVisibility();
+  updateMedlemSidenVisibility();
   updateModalHeadColor();
 });
 els.kontingentToggle.addEventListener('change', () => {
@@ -2668,12 +2769,22 @@ els.saveVenueBtn.addEventListener('click', async ()=>{
     note: els.f_note.value.trim(),
     medlem: newMedlem,
     kontingentBetalt: newMedlem ? els.kontingentToggle.checked : false,
-    finansiering: getFinansieringValue(),
+    finansiering: els.f_finansiering.value,
     antalAnsatte: els.f_ansatte.value,
     antalFrivillige: els.f_frivillige.value,
     medlemSiden: els.f_medlem_siden.value,
     tidligereMedlem,
-    status: isSuperuser ? els.f_status.value : (existing ? existing.status : 'Aktiv')
+    status: existing ? (existing.status || 'Aktiv') : 'Aktiv',
+    lederNavn: els.f_leder_navn.value.trim(),
+    lederTelefon: els.f_leder_telefon.value.trim(),
+    lederEmail: els.f_leder_email.value.trim(),
+    lederNoter: els.f_leder_noter.value.trim(),
+    kontaktNavn: els.f_kontakt_navn.value.trim(),
+    kontaktTitel: els.f_kontakt_titel.value.trim(),
+    kontaktTelefon: els.f_kontakt_telefon.value.trim(),
+    kontaktEmail: els.f_kontakt_email.value.trim(),
+    kontaktNoter: els.f_kontakt_noter.value.trim(),
+    foretrukkenKontakt: els.f_foretrukken_kontakt.value
   };
   const row = venueToRow(payload);
   if(editingVenueId){

@@ -910,6 +910,27 @@
   .field-row{display:flex;gap:10px;}
   .field-row .field{flex:1;}
 
+  .field-hint{
+    font-size:11px;
+    color:var(--ink-soft);
+    margin:5px 0 0 0;
+    font-weight:400;
+    text-transform:none;
+    letter-spacing:0;
+  }
+  .budget-controls{ margin-top:10px; }
+  .budget-controls label{
+    display:block;
+    font-size:10px;
+    font-weight:700;
+    text-transform:uppercase;
+    letter-spacing:.08em;
+    color:var(--ink-soft);
+    margin-bottom:5px;
+  }
+  .legend-bar-budget{
+    background:linear-gradient(90deg,#FBE9C8,#7A4E0B);
+  }
   .kontakt-group{
     border:1px solid var(--line);
     border-radius:10px;
@@ -1265,7 +1286,16 @@
           <option value="sport">Deltaget i sport / Ikke deltaget</option>
           <option value="kontingent">Kontingent betalt / Ikke betalt</option>
           <option value="tidslinje">Medlemsudvikling over tid</option>
+          <option value="budget">Samlet budget</option>
         </select>
+        <div class="budget-controls" id="budgetControls" style="display:none;">
+          <label for="budgetAggSelect">Beregn kommunens tal som</label>
+          <select id="budgetAggSelect">
+            <option value="sum">Budgetterne lagt sammen</option>
+            <option value="max">Det største enkelte budget</option>
+            <option value="avg">Gennemsnittet</option>
+          </select>
+        </div>
         <div class="timeline-controls" id="timelineControls" style="display:none;">
           <div class="timeline-year-row">
             <button id="timelinePlayBtn" type="button" title="Afspil">▶</button>
@@ -1291,6 +1321,12 @@
         <span class="legend-swatch" style="background:var(--member);"></span> Har deltagere
         <span style="margin-left:6px;">·</span>
         <span class="legend-swatch" style="background:var(--map-empty);"></span> Ingen deltagere
+      </div>
+      <div class="legend" id="legendBudget" style="display:none;">
+        <span class="legend-empty"></span> Intet budget angivet
+        <span style="margin-left:6px;">·</span>
+        <span class="legend-bar legend-bar-budget"></span>
+        <span>0 kr. → 10 mio.+</span>
       </div>
       <div class="legend" id="legendTimeline" style="display:none;">
         <span class="legend-empty"></span> 0 medlemmer
@@ -1377,6 +1413,7 @@
         <button class="modal-tab active" data-tab="generelt">Generelt</button>
         <button class="modal-tab" data-tab="detaljer">Detaljer</button>
         <button class="modal-tab" data-tab="kontakt">Kontaktoplysninger</button>
+        <button class="modal-tab" data-tab="politik">Politik</button>
         <button class="modal-tab" data-tab="note">Note</button>
       </div>
 
@@ -1518,6 +1555,34 @@
         </div>
       </div>
 
+      <div class="modal-tab-content" id="venueTabPolitik" style="display:none;">
+        <div class="field">
+          <label for="f_sparekatalog_for">Har været i sparekatalog før</label>
+          <select id="f_sparekatalog_for">
+            <option value="">Ikke angivet</option>
+            <option value="Ja">Ja</option>
+            <option value="Nej">Nej</option>
+          </select>
+        </div>
+        <div class="field" id="sparekatalogAarField" style="display:none;">
+          <label for="f_sparekatalog_aar">Hvornår</label>
+          <input type="text" id="f_sparekatalog_aar" placeholder="F.eks. 2019, 2023">
+        </div>
+        <div class="field">
+          <label for="f_sparekatalog_dato">Kommunens sparekatalog udkom</label>
+          <input type="date" id="f_sparekatalog_dato">
+          <p class="field-hint" id="sparekatalogDatoHint">Datoen gælder hele kommunen og vises på alle væresteder i den.</p>
+        </div>
+        <div class="field">
+          <label for="f_samlet_budget">Samlet budget (kr.)</label>
+          <input type="number" id="f_samlet_budget" min="0" step="1000" placeholder="F.eks. 1250000">
+        </div>
+        <div class="field">
+          <label for="f_politik_noter">Noter</label>
+          <textarea id="f_politik_noter" placeholder="F.eks. politiske forhold, aftaler eller andet at huske..." style="min-height:140px;"></textarea>
+        </div>
+      </div>
+
       <div class="modal-tab-content" id="venueTabNote" style="display:none;">
         <div class="field">
           <label for="f_note">Note</label>
@@ -1543,6 +1608,17 @@
       <button class="modal-close" id="kommuneModalClose">✕</button>
     </div>
     <div class="modal-body kommune-info-body">
+      <div class="kommune-info-section">
+        <div class="kis-head">
+          <h3>🗂 Sparekatalog</h3>
+        </div>
+        <div class="field">
+          <label for="k_sparekatalog_dato">Kommunens sparekatalog udkom</label>
+          <input type="date" id="k_sparekatalog_dato">
+          <p class="field-hint">Gemmes med det samme og vises på alle væresteder i kommunen.</p>
+        </div>
+      </div>
+
       <div class="kommune-info-section">
         <div class="kis-head">
           <h3>🏛 Byråd</h3>
@@ -1709,6 +1785,8 @@ const els = {};
  "f_leder_navn","f_leder_telefon","f_leder_email","f_leder_noter",
  "f_kontakt_navn","f_kontakt_titel","f_kontakt_telefon","f_kontakt_email","f_kontakt_noter",
  "f_foretrukken_kontakt","statusField",
+ "f_sparekatalog_for","f_sparekatalog_aar","sparekatalogAarField","f_sparekatalog_dato","sparekatalogDatoHint",
+ "f_samlet_budget","f_politik_noter","k_sparekatalog_dato","budgetControls","budgetAggSelect","legendBudget",
  "f_medlem_siden","medlemSidenField","formerMemberBanner","f_status","statusSuperuserHint",
  "deleteVenueBtn","saveVenueBtn",
  "kommuneOverlay","kommuneModalTitle","kommuneModalClose",
@@ -1751,7 +1829,11 @@ function rowToVenue(r){
     kontaktTelefon: r.kontakt_telefon || '',
     kontaktEmail: r.kontakt_email || '',
     kontaktNoter: r.kontakt_noter || '',
-    foretrukkenKontakt: r.foretrukken_kontakt || ''
+    foretrukkenKontakt: r.foretrukken_kontakt || '',
+    sparekatalogFor: r.sparekatalog_for || '',
+    sparekatalogAar: r.sparekatalog_aar || '',
+    samletBudget: (r.samlet_budget === null || r.samlet_budget === undefined) ? '' : String(r.samlet_budget),
+    politikNoter: r.politik_noter || ''
   };
 }
 function venueToRow(v){
@@ -1782,7 +1864,11 @@ function venueToRow(v){
     kontakt_telefon: v.kontaktTelefon || '',
     kontakt_email: v.kontaktEmail || '',
     kontakt_noter: v.kontaktNoter || '',
-    foretrukken_kontakt: v.foretrukkenKontakt || ''
+    foretrukken_kontakt: v.foretrukkenKontakt || '',
+    sparekatalog_for: v.sparekatalogFor || '',
+    sparekatalog_aar: v.sparekatalogAar || '',
+    samlet_budget: v.samletBudget === '' || v.samletBudget === null || v.samletBudget === undefined ? null : Number(v.samletBudget),
+    politik_noter: v.politikNoter || ''
   };
 }
 
@@ -1827,7 +1913,7 @@ async function reloadKommuneInfo(){
   if(error){ console.error('Kunne ikke hente kommuneinfo', error); return; }
   db.kommuneInfo = {};
   (data || []).forEach(r => {
-    db.kommuneInfo[r.kommune_code] = { byraad: r.byraad || '', medier: r.medier || '' };
+    db.kommuneInfo[r.kommune_code] = { byraad: r.byraad || '', medier: r.medier || '', sparekatalogDato: r.sparekatalog_dato || '' };
   });
   renderAll();
 }
@@ -1861,7 +1947,7 @@ async function loadDB(){
 
     db.kommuneInfo = {};
     (kommuneRes.data || []).forEach(r => {
-      db.kommuneInfo[r.kommune_code] = { byraad: r.byraad || '', medier: r.medier || '' };
+      db.kommuneInfo[r.kommune_code] = { byraad: r.byraad || '', medier: r.medier || '', sparekatalogDato: r.sparekatalog_dato || '' };
     });
 
     db.events = (eventsRes.data || []).map(rowToEvent);
@@ -1934,6 +2020,9 @@ function colorForKommune(code){
   if(mapColorMode === 'tidslinje'){
     return colorForKommuneTimeline(code);
   }
+  if(mapColorMode === 'budget'){
+    return colorForKommuneBudget(code);
+  }
   const s = kommuneStats(code);
   const c1 = [0xBF,0x5B,0x2E], c2 = [0x2F,0x6B,0x4F]; // nonmember-farve -> member-farve
   let ratio, total;
@@ -1949,6 +2038,49 @@ function colorForKommune(code){
   }
   if(total === 0) return 'var(--map-empty)';
   const mix = c1.map((c,i)=>Math.round(c + (c2[i]-c)*ratio));
+  return `rgb(${mix[0]},${mix[1]},${mix[2]})`;
+}
+
+// ---------- SAMLET BUDGET ----------
+// Intervaller på 500.000 kr. op til 10 mio., derefter ét interval for 10 mio.+
+const BUDGET_STEP = 500000;
+const BUDGET_BUCKETS = 20; // 0..19 dækker 0-10 mio., 20 = over 10 mio.
+let budgetAggregation = 'sum'; // 'sum' | 'max' | 'avg'
+
+function kommuneBudget(code){
+  const tal = db.vaerested
+    .filter(v => v.kommuneCode === code && v.samletBudget !== '' && !isNaN(Number(v.samletBudget)))
+    .map(v => Number(v.samletBudget));
+  if(tal.length === 0) return null;
+  if(budgetAggregation === 'max') return Math.max(...tal);
+  const sum = tal.reduce((a,b)=>a+b, 0);
+  return budgetAggregation === 'avg' ? Math.round(sum / tal.length) : sum;
+}
+
+function budgetBucket(belob){
+  if(belob === null || belob <= 0) return null;
+  if(belob > BUDGET_STEP * BUDGET_BUCKETS) return BUDGET_BUCKETS;
+  return Math.min(BUDGET_BUCKETS - 1, Math.ceil(belob / BUDGET_STEP) - 1);
+}
+
+function formatKr(n){
+  return Number(n).toLocaleString('da-DK') + ' kr.';
+}
+
+function budgetBucketLabel(bucket){
+  if(bucket === null) return 'Intet budget angivet';
+  if(bucket === BUDGET_BUCKETS) return 'Over ' + formatKr(BUDGET_STEP * BUDGET_BUCKETS);
+  const fra = bucket === 0 ? 0 : bucket * BUDGET_STEP + 1;
+  return formatKr(fra) + ' – ' + formatKr((bucket + 1) * BUDGET_STEP);
+}
+
+function colorForKommuneBudget(code){
+  const bucket = budgetBucket(kommuneBudget(code));
+  if(bucket === null) return 'var(--map-empty)';
+  const t = bucket / BUDGET_BUCKETS;
+  const c1 = [0xFB,0xE9,0xC8]; // lys (lavt budget)
+  const c2 = [0x7A,0x4E,0x0B]; // mørk (højt budget)
+  const mix = c1.map((c,i)=>Math.round(c + (c2[i]-c)*t));
   return `rgb(${mix[0]},${mix[1]},${mix[2]})`;
 }
 
@@ -2096,6 +2228,11 @@ function showMapTooltip(e, m){
       : `${count} medlem${count===1?'':'mer'} i ${timelineYear}`;
   } else if(mapColorMode === 'sport'){
     subText = `${s.total} værested${s.total===1?'':'er'} · ${s.deltaget} deltaget · ${s.ikkeDeltaget} ikke deltaget`;
+  } else if(mapColorMode === 'budget'){
+    const belob = kommuneBudget(m.code);
+    subText = belob === null
+      ? 'Intet budget angivet'
+      : formatKr(belob) + ' · ' + budgetBucketLabel(budgetBucket(belob));
   } else if(mapColorMode === 'kontingent'){
     subText = s.medlemmerTotal === 0
       ? `${s.total} værested${s.total===1?'':'er'} · ingen medlemmer`
@@ -2489,8 +2626,11 @@ function renderSportsEventList(){
 function updateMapModeUI(){
   const inEventMode = viewMode === 'event' && eventFilterIds.size > 0;
   const inTimelineMode = !inEventMode && mapColorMode === 'tidslinje';
+  const inBudgetMode = !inEventMode && mapColorMode === 'budget';
   els.mapModeSwitch.style.display = inEventMode ? 'none' : 'flex';
-  els.legendNormal.style.display = (inEventMode || inTimelineMode) ? 'none' : 'flex';
+  els.legendNormal.style.display = (inEventMode || inTimelineMode || inBudgetMode) ? 'none' : 'flex';
+  els.legendBudget.style.display = inBudgetMode ? 'flex' : 'none';
+  els.budgetControls.style.display = inBudgetMode ? 'block' : 'none';
   els.legendEvent.style.display = inEventMode ? 'flex' : 'none';
   els.legendTimeline.style.display = inTimelineMode ? 'flex' : 'none';
   els.timelineControls.style.display = inTimelineMode ? 'block' : 'none';
@@ -2651,6 +2791,7 @@ function switchVenueTab(tab){
   document.getElementById('venueTabGenerelt').style.display = tab === 'generelt' ? 'block' : 'none';
   document.getElementById('venueTabDetaljer').style.display = tab === 'detaljer' ? 'block' : 'none';
   document.getElementById('venueTabKontakt').style.display = tab === 'kontakt' ? 'block' : 'none';
+  document.getElementById('venueTabPolitik').style.display = tab === 'politik' ? 'block' : 'none';
   document.getElementById('venueTabNote').style.display = tab === 'note' ? 'block' : 'none';
 }
 els.venueModalTabs.addEventListener('click', (e) => {
@@ -2693,6 +2834,12 @@ function openVenueModal(id){
   els.f_kontakt_email.value = v ? (v.kontaktEmail || '') : '';
   els.f_kontakt_noter.value = v ? (v.kontaktNoter || '') : '';
   els.f_foretrukken_kontakt.value = v ? (v.foretrukkenKontakt || '') : '';
+  els.f_sparekatalog_for.value = v ? (v.sparekatalogFor || '') : '';
+  els.f_sparekatalog_aar.value = v ? (v.sparekatalogAar || '') : '';
+  els.f_samlet_budget.value = v ? (v.samletBudget || '') : '';
+  els.f_politik_noter.value = v ? (v.politikNoter || '') : '';
+  updateSparekatalogAarVisibility();
+  fillSparekatalogDato(els.f_kommune.value);
   els.memberToggle.checked = v ? !!v.medlem : true;
   els.kontingentToggle.checked = v ? !!v.kontingentBetalt : false;
   updateToggleLabel();
@@ -2704,6 +2851,18 @@ function openVenueModal(id){
 
   els.venueOverlay.classList.add('open');
 }
+// Datoen hører til kommunen, så den hentes ud fra den valgte kommune og
+// er ens for alle væresteder i kommunen.
+function fillSparekatalogDato(kommuneCode){
+  const info = db.kommuneInfo[kommuneCode];
+  els.f_sparekatalog_dato.value = info ? (info.sparekatalogDato || '') : '';
+}
+function updateSparekatalogAarVisibility(){
+  els.sparekatalogAarField.style.display = els.f_sparekatalog_for.value === 'Ja' ? 'block' : 'none';
+}
+els.f_sparekatalog_for.addEventListener('change', updateSparekatalogAarVisibility);
+els.f_kommune.addEventListener('change', () => fillSparekatalogDato(els.f_kommune.value));
+
 function closeVenueModal(){ els.venueOverlay.classList.remove('open'); editingVenueId = null; }
 
 function updateToggleLabel(){
@@ -2784,7 +2943,11 @@ els.saveVenueBtn.addEventListener('click', async ()=>{
     kontaktTelefon: els.f_kontakt_telefon.value.trim(),
     kontaktEmail: els.f_kontakt_email.value.trim(),
     kontaktNoter: els.f_kontakt_noter.value.trim(),
-    foretrukkenKontakt: els.f_foretrukken_kontakt.value
+    foretrukkenKontakt: els.f_foretrukken_kontakt.value,
+    sparekatalogFor: els.f_sparekatalog_for.value,
+    sparekatalogAar: els.f_sparekatalog_for.value === 'Ja' ? els.f_sparekatalog_aar.value.trim() : '',
+    samletBudget: els.f_samlet_budget.value,
+    politikNoter: els.f_politik_noter.value.trim()
   };
   const row = venueToRow(payload);
   if(editingVenueId){
@@ -2797,6 +2960,7 @@ els.saveVenueBtn.addEventListener('click', async ()=>{
     if(error){ showToast('Kunne ikke oprette værested'); console.error(error); return; }
     db.vaerested.push(rowToVenue(data));
   }
+  await saveSparekatalogDato(kommuneCode, els.f_sparekatalog_dato.value);
   closeVenueModal();
   renderAll();
   showToast('Værested gemt');
@@ -2828,6 +2992,19 @@ function getMedieArray(code){
   if(!raw) return [];
   try{ const arr = JSON.parse(raw); return Array.isArray(arr) ? arr : []; }
   catch(e){ return []; }
+}
+
+async function saveSparekatalogDato(code, dato){
+  const nuvaerende = db.kommuneInfo[code] ? (db.kommuneInfo[code].sparekatalogDato || '') : '';
+  if((dato || '') === nuvaerende) return true;
+  const { error } = await sb.from('kommune_info').upsert({
+    kommune_code: code,
+    sparekatalog_dato: dato || null
+  }, { onConflict: 'kommune_code' });
+  if(error){ showToast('Kunne ikke gemme sparekatalog-datoen'); console.error(error); return false; }
+  if(!db.kommuneInfo[code]) db.kommuneInfo[code] = { byraad: '', medier: '', sparekatalogDato: '' };
+  db.kommuneInfo[code].sparekatalogDato = dato || '';
+  return true;
 }
 
 async function saveKommuneInfo(code, byraadArr, medieArr){
@@ -2938,9 +3115,17 @@ els.byraadBtn.addEventListener('click', ()=>{
   els.kommuneModalTitle.textContent = selectedKommune.name + ' — Byråd & medier';
   els.byraadForm.style.display = 'none';
   els.medieForm.style.display = 'none';
+  els.k_sparekatalog_dato.value = db.kommuneInfo[kommuneInfoCode] ? (db.kommuneInfo[kommuneInfoCode].sparekatalogDato || '') : '';
+  els.k_sparekatalog_dato.dataset.code = kommuneInfoCode;
   renderByraadList(kommuneInfoCode);
   renderMedieList(kommuneInfoCode);
   els.kommuneOverlay.classList.add('open');
+});
+els.k_sparekatalog_dato.addEventListener('change', async () => {
+  const code = els.k_sparekatalog_dato.dataset.code;
+  if(!code) return;
+  const ok = await saveSparekatalogDato(code, els.k_sparekatalog_dato.value);
+  if(ok) showToast('Sparekatalog-dato gemt');
 });
 els.kommuneModalClose.addEventListener('click', ()=>els.kommuneOverlay.classList.remove('open'));
 els.kommuneOverlay.addEventListener('click', (e)=>{ if(e.target===els.kommuneOverlay) els.kommuneOverlay.classList.remove('open'); });
@@ -3326,6 +3511,10 @@ const LEGEND_TEXT = {
   sport: 'Ikke deltaget → Deltaget i sport (andel)',
   kontingent: 'Ikke betalt → Betalt (andel af medlemmer)'
 };
+els.budgetAggSelect.addEventListener('change', () => {
+  budgetAggregation = els.budgetAggSelect.value;
+  renderMap();
+});
 els.mapModeSelect.addEventListener('change', () => {
   mapColorMode = els.mapModeSelect.value;
   if(LEGEND_TEXT[mapColorMode]) els.legendModeText.textContent = LEGEND_TEXT[mapColorMode];

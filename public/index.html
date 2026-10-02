@@ -630,6 +630,31 @@
     gap:8px;
     margin-top:10px;
   }
+  .sh-sparekatalog{
+    margin-top:10px;
+  }
+  .sh-sparekatalog label{
+    display:block;
+    font-size:10px;
+    font-weight:700;
+    text-transform:uppercase;
+    letter-spacing:.08em;
+    color:var(--ink-soft);
+    margin-bottom:5px;
+  }
+  .sh-sparekatalog input{
+    width:100%;
+    padding:7px 10px;
+    border:1px solid var(--line);
+    border-radius:7px;
+    background:var(--paper);
+    font-family:'Inter',sans-serif;
+    font-size:13px;
+    color:var(--ink);
+    box-sizing:border-box;
+    outline:none;
+  }
+  .sh-sparekatalog input:focus{border-color:var(--select);}
   .sh-count{
     font-size:12.5px;
     color:var(--ink-soft);
@@ -1361,6 +1386,10 @@
         <div class="sh-actions" id="shActions" style="display:none;">
           <button class="btn btn-ghost btn-sm" id="byraadBtn">🏛 Byråd &amp; medier</button>
         </div>
+        <div class="sh-sparekatalog" id="shSparekatalog" style="display:none;">
+          <label for="sh_sparekatalog_dato">🗂 Kommunens sparekatalog udkom</label>
+          <input type="date" id="sh_sparekatalog_dato">
+        </div>
       </div>
 
       <div class="list-scroll" id="listScroll"></div>
@@ -1412,7 +1441,7 @@
       <div class="modal-tabs" id="venueModalTabs">
         <button class="modal-tab active" data-tab="generelt">Generelt</button>
         <button class="modal-tab" data-tab="detaljer">Detaljer</button>
-        <button class="modal-tab" data-tab="kontakt">Kontaktoplysninger</button>
+        <button class="modal-tab" data-tab="kontakt">Kontakt</button>
         <button class="modal-tab" data-tab="politik">Politik</button>
         <button class="modal-tab" data-tab="note">Note</button>
       </div>
@@ -1777,7 +1806,7 @@ const els = {};
  "timelineControls","timelinePlayBtn","timelineYearLabel","timelineSlider",
  "zoomInBtn","zoomOutBtn","zoomResetBtn","mapModeSelect","legendModeText","insetFrame","insetFrameTop","insetTitle",
  "searchInput","searchClear","newVenueBtn","dkMap","mapTooltip","statTotal","statMember","statNonmember",
- "shName","shClearBtn","shCount","shActions","byraadBtn","listScroll","scopeBanner",
+ "shName","shClearBtn","shCount","shActions","byraadBtn","shSparekatalog","sh_sparekatalog_dato","listScroll","scopeBanner",
  "venueOverlay","venueModalTitle","venueModalClose","venueModalHead","venueModalTabs","toggleStatusLabel","memberToggle",
  "kontingentToggleRow","kontingentStatusLabel","kontingentToggle",
  "f_navn","f_adresse","f_kommune","f_telefon","f_email","f_type","f_tilknytning","f_note",
@@ -2460,36 +2489,46 @@ function renderHeader(){
     els.shName.textContent = `Søgeresultater: "${searchQuery}"`;
     els.shClearBtn.style.display = 'none';
     els.shActions.style.display = 'none';
+    els.shSparekatalog.style.display = 'none';
   } else if(viewMode === 'kommune' && selectedKommune){
     els.shName.textContent = selectedKommune.name;
     els.shClearBtn.style.display = 'flex';
     els.shActions.style.display = 'flex';
+    els.shSparekatalog.style.display = 'block';
+    els.sh_sparekatalog_dato.value = db.kommuneInfo[selectedKommune.code] ? (db.kommuneInfo[selectedKommune.code].sparekatalogDato || '') : '';
+    els.sh_sparekatalog_dato.dataset.code = selectedKommune.code;
   } else if(viewMode === 'event' && selectedEvents.length > 0){
     els.shName.textContent = selectedEvents.length === 1
       ? '🏅 ' + selectedEvents[0].navn
       : `🏅 ${selectedEvents.length} sportsbegivenheder valgt`;
     els.shClearBtn.style.display = 'flex';
     els.shActions.style.display = 'none';
+    els.shSparekatalog.style.display = 'none';
   } else if(viewMode === 'members'){
     els.shName.textContent = 'Alle medlemmer';
     els.shClearBtn.style.display = 'none';
     els.shActions.style.display = 'none';
+    els.shSparekatalog.style.display = 'none';
   } else if(viewMode === 'nonmembers'){
     els.shName.textContent = 'Alle ikke-medlemmer';
     els.shClearBtn.style.display = 'none';
     els.shActions.style.display = 'none';
+    els.shSparekatalog.style.display = 'none';
   } else if(viewMode === 'sport-all'){
     els.shName.textContent = 'Deltaget i sport';
     els.shClearBtn.style.display = 'none';
     els.shActions.style.display = 'none';
+    els.shSparekatalog.style.display = 'none';
   } else if(viewMode === 'former-members'){
     els.shName.textContent = '⏳ Tidligere medlemmer';
     els.shClearBtn.style.display = 'none';
     els.shActions.style.display = 'none';
+    els.shSparekatalog.style.display = 'none';
   } else {
     els.shName.textContent = 'Alle væresteder';
     els.shClearBtn.style.display = 'none';
     els.shActions.style.display = 'none';
+    els.shSparekatalog.style.display = 'none';
   }
   const list = currentListVenues();
   els.shCount.textContent = `${list.length} værested${list.length===1?'':'er'}`;
@@ -2997,11 +3036,18 @@ function getMedieArray(code){
 async function saveSparekatalogDato(code, dato){
   const nuvaerende = db.kommuneInfo[code] ? (db.kommuneInfo[code].sparekatalogDato || '') : '';
   if((dato || '') === nuvaerende) return true;
-  const { error } = await sb.from('kommune_info').upsert({
-    kommune_code: code,
-    sparekatalog_dato: dato || null
-  }, { onConflict: 'kommune_code' });
+  // Opdatér hvis rækken findes, ellers opret den. Vi bruger bevidst ikke upsert,
+  // så byråds- og mediedata på kommunen ikke kan blive overskrevet.
+  const { data, error } = await sb.from('kommune_info')
+    .update({ sparekatalog_dato: dato || null })
+    .eq('kommune_code', code)
+    .select('kommune_code');
   if(error){ showToast('Kunne ikke gemme sparekatalog-datoen'); console.error(error); return false; }
+  if(!data || data.length === 0){
+    const { error: insertError } = await sb.from('kommune_info')
+      .insert({ kommune_code: code, sparekatalog_dato: dato || null });
+    if(insertError){ showToast('Kunne ikke gemme sparekatalog-datoen'); console.error(insertError); return false; }
+  }
   if(!db.kommuneInfo[code]) db.kommuneInfo[code] = { byraad: '', medier: '', sparekatalogDato: '' };
   db.kommuneInfo[code].sparekatalogDato = dato || '';
   return true;
@@ -3120,6 +3166,12 @@ els.byraadBtn.addEventListener('click', ()=>{
   renderByraadList(kommuneInfoCode);
   renderMedieList(kommuneInfoCode);
   els.kommuneOverlay.classList.add('open');
+});
+els.sh_sparekatalog_dato.addEventListener('change', async () => {
+  const code = els.sh_sparekatalog_dato.dataset.code;
+  if(!code) return;
+  const ok = await saveSparekatalogDato(code, els.sh_sparekatalog_dato.value);
+  if(ok) showToast('Sparekatalog-dato gemt');
 });
 els.k_sparekatalog_dato.addEventListener('change', async () => {
   const code = els.k_sparekatalog_dato.dataset.code;

@@ -1409,7 +1409,7 @@
       </div>
     </div>
     <div class="modal-body">
-      <div class="toggle-row">
+      <div class="toggle-row" id="memberToggleRow">
         <div class="toggle-label" id="toggleStatusLabel">Ikke medlem
           <span class="sub">Angiv om værestedet er medlem hos os</span>
         </div>
@@ -1808,7 +1808,7 @@ const els = {};
  "searchInput","searchClear","newVenueBtn","dkMap","mapTooltip","statTotal","statMember","statNonmember",
  "shName","shClearBtn","shCount","shActions","byraadBtn","shSparekatalog","sh_sparekatalog_dato","listScroll","scopeBanner",
  "venueOverlay","venueModalTitle","venueModalClose","venueModalHead","venueModalTabs","toggleStatusLabel","memberToggle",
- "kontingentToggleRow","kontingentStatusLabel","kontingentToggle",
+ "memberToggleRow","kontingentToggleRow","kontingentStatusLabel","kontingentToggle",
  "f_navn","f_adresse","f_kommune","f_telefon","f_email","f_type","f_tilknytning","f_note",
  "f_finansiering","f_ansatte","f_frivillige",
  "f_leder_navn","f_leder_telefon","f_leder_email","f_leder_noter",
@@ -2823,7 +2823,13 @@ function populateKommuneSelect(){
   els.f_kommune.innerHTML = sorted.map(m => `<option value="${m.code}">${m.name}</option>`).join('');
 }
 
+// Medlemskab, kontingent og "Medlem siden" hører til fanen Generelt og skjules på de andre faner.
+let activeVenueTab = 'generelt';
+let venueErTidligereMedlem = false;
+
 function switchVenueTab(tab){
+  activeVenueTab = tab;
+  updateMedlemskabVisibility();
   els.venueModalTabs.querySelectorAll('.modal-tab').forEach(btn => {
     btn.classList.toggle('active', btn.dataset.tab === tab);
   });
@@ -2886,7 +2892,8 @@ function openVenueModal(id){
   updateMedlemSidenVisibility();
   updateKontingentLabel();
   updateModalHeadColor();
-  els.formerMemberBanner.style.display = (v && v.tidligereMedlem && !v.medlem) ? 'block' : 'none';
+  venueErTidligereMedlem = !!(v && v.tidligereMedlem && !v.medlem);
+  updateMedlemskabVisibility();
 
   els.venueOverlay.classList.add('open');
 }
@@ -2908,12 +2915,19 @@ function updateToggleLabel(){
   els.toggleStatusLabel.childNodes[0].textContent = els.memberToggle.checked ? 'Medlem' : 'Ikke medlem';
 }
 function updateKontingentVisibility(){
-  els.kontingentToggleRow.style.display = els.memberToggle.checked ? 'flex' : 'none';
+  updateMedlemskabVisibility();
+}
+function updateMedlemskabVisibility(){
+  const paaGenerelt = activeVenueTab === 'generelt';
+  els.memberToggleRow.style.display = paaGenerelt ? 'flex' : 'none';
+  els.kontingentToggleRow.style.display = (paaGenerelt && els.memberToggle.checked) ? 'flex' : 'none';
+  els.medlemSidenField.style.display = (paaGenerelt && els.memberToggle.checked) ? 'block' : 'none';
+  els.formerMemberBanner.style.display = (paaGenerelt && venueErTidligereMedlem) ? 'block' : 'none';
 }
 // "Medlem siden" vises kun for aktive medlemmer. Værdien bliver stående i feltet
 // og i databasen, så den dukker op igen, hvis værestedet melder sig ind på ny.
 function updateMedlemSidenVisibility(){
-  els.medlemSidenField.style.display = els.memberToggle.checked ? 'block' : 'none';
+  updateMedlemskabVisibility();
 }
 function updateKontingentLabel(){
   els.kontingentStatusLabel.childNodes[0].textContent = els.kontingentToggle.checked ? 'Kontingent betalt' : 'Kontingent ikke betalt';

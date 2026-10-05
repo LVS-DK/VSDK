@@ -935,6 +935,10 @@
   .field-row{display:flex;gap:10px;}
   .field-row .field{flex:1;}
 
+  .aktiviteter-btn{
+    width:100%;
+    margin-top:4px;
+  }
   .field-hint{
     font-size:11px;
     color:var(--ink-soft);
@@ -1134,6 +1138,13 @@
   }
   .checkbox-row{
     display:flex; align-items:center; gap:7px; font-size:13.5px; margin-bottom:10px; cursor:pointer;
+  }
+  .field label.checkbox-row{
+    text-transform:none;
+    letter-spacing:0;
+    font-size:13.5px;
+    font-weight:400;
+    color:var(--ink);
   }
   .checkbox-row input{ width:16px; height:16px; cursor:pointer; }
 
@@ -1440,9 +1451,8 @@
 
       <div class="modal-tabs" id="venueModalTabs">
         <button class="modal-tab active" data-tab="generelt">Generelt</button>
-        <button class="modal-tab" data-tab="detaljer">Detaljer</button>
+        <button class="modal-tab" data-tab="detaljer">Type værested</button>
         <button class="modal-tab" data-tab="kontakt">Kontakt</button>
-        <button class="modal-tab" data-tab="politik">Økonomi</button>
         <button class="modal-tab" data-tab="note">Note</button>
       </div>
 
@@ -1480,9 +1490,59 @@
             <option value="Lukket">Lukket</option>
           </select>
         </div>
-        <!-- Det gamle fritekstfelt "Type værested" er erstattet af dropdownen nedenfor.
+        <!-- Det gamle fritekstfelt "Type værested" er erstattet af dropdownen Rusmiddelpolitik.
              Kolonnen type og de gamle værdier bliver i databasen. -->
         <input type="hidden" id="f_type">
+        <div class="field">
+          <label for="f_tilknytning">Driftsform</label>
+          <select id="f_tilknytning">
+            <option value="Offentligt">Offentligt</option>
+            <option value="Privat">Privat</option>
+            <option value="Frivilligt drevet">Frivilligt drevet</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="f_finansiering">Finansiering</label>
+          <select id="f_finansiering">
+            <option value="">Ikke angivet</option>
+            <option value="Offentlig">Offentlig</option>
+            <option value="Privat">Privat</option>
+            <option value="Delvist offentligt tilskud">Delvist offentligt tilskud</option>
+          </select>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label for="f_ansatte">Antal ansatte</label>
+            <select id="f_ansatte">
+              <option value="">Ikke angivet</option>
+              <option value="1-3">1-3</option>
+              <option value="4-6">4-6</option>
+              <option value="7-10">7-10</option>
+              <option value="10+">10+</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="f_frivillige">Antal frivillige</label>
+            <select id="f_frivillige">
+              <option value="">Ikke angivet</option>
+              <option value="1-3">1-3</option>
+              <option value="4-6">4-6</option>
+              <option value="7-10">7-10</option>
+              <option value="10+">10+</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Primære målgruppe</label>
+          <p class="field-hint">Sæt gerne flere krydser.</p>
+          <div id="maalgruppeList"></div>
+        </div>
+        <div class="field" id="maalgruppeAndetField" style="display:none;">
+          <label for="f_maalgruppe_andet">Uddyb andre sociale problemer</label>
+          <input type="text" id="f_maalgruppe_andet" placeholder="Beskriv kort">
+        </div>
+
         <div class="field">
           <label for="f_rusmiddelpolitik">Rusmiddelpolitik</label>
           <select id="f_rusmiddelpolitik">
@@ -1498,25 +1558,7 @@
           <input type="text" id="f_rusmiddel_andet" placeholder="Beskriv kort">
         </div>
 
-        <div class="field">
-          <label>Målgruppe primære</label>
-          <p class="field-hint">Sæt gerne flere krydser.</p>
-          <div id="maalgruppeList"></div>
-        </div>
-        <div class="field" id="maalgruppeAndetField" style="display:none;">
-          <label for="f_maalgruppe_andet">Uddyb andre sociale problemer</label>
-          <input type="text" id="f_maalgruppe_andet" placeholder="Beskriv kort">
-        </div>
-
-        <div class="field">
-          <label>Indsatser/aktiviteter</label>
-          <p class="field-hint">Sæt gerne flere krydser.</p>
-          <div id="indsatserList"></div>
-        </div>
-        <div class="field" id="indsatserAndetField" style="display:none;">
-          <label for="f_indsatser_andet">Uddyb</label>
-          <input type="text" id="f_indsatser_andet" placeholder="Beskriv kort">
-        </div>
+        <button class="btn btn-ghost aktiviteter-btn" id="openAktiviteterBtn" type="button">Se aktiviteter</button>
       </div>
 
       <div class="modal-tab-content" id="venueTabKontakt" style="display:none;">
@@ -1578,73 +1620,13 @@
         </div>
       </div>
 
-      <div class="modal-tab-content" id="venueTabPolitik" style="display:none;">
-        <div class="field">
-          <label for="f_tilknytning">Driftsform</label>
-          <select id="f_tilknytning">
-            <option value="Offentligt">Offentligt</option>
-            <option value="Privat">Privat</option>
-            <option value="Frivilligt drevet">Frivilligt drevet</option>
-          </select>
-        </div>
-        <div class="field">
-          <label for="f_finansiering">Finansiering</label>
-          <select id="f_finansiering">
-            <option value="">Ikke angivet</option>
-            <option value="Offentlig">Offentlig</option>
-            <option value="Privat">Privat</option>
-            <option value="Delvist offentligt tilskud">Delvist offentligt tilskud</option>
-          </select>
-        </div>
-        <div class="field-row">
-          <div class="field">
-            <label for="f_ansatte">Antal ansatte</label>
-            <select id="f_ansatte">
-              <option value="">Ikke angivet</option>
-              <option value="1-3">1-3</option>
-              <option value="4-6">4-6</option>
-              <option value="7-10">7-10</option>
-              <option value="10+">10+</option>
-            </select>
-          </div>
-          <div class="field">
-            <label for="f_frivillige">Antal frivillige</label>
-            <select id="f_frivillige">
-              <option value="">Ikke angivet</option>
-              <option value="1-3">1-3</option>
-              <option value="4-6">4-6</option>
-              <option value="7-10">7-10</option>
-              <option value="10+">10+</option>
-            </select>
-          </div>
-        </div>
-
-        <div class="field">
-          <label for="f_sparekatalog_for">Har været i sparekatalog før</label>
-          <select id="f_sparekatalog_for">
-            <option value="">Ikke angivet</option>
-            <option value="Ja">Ja</option>
-            <option value="Nej">Nej</option>
-          </select>
-        </div>
-        <div class="field" id="sparekatalogAarField" style="display:none;">
-          <label for="f_sparekatalog_aar">Hvornår</label>
-          <input type="text" id="f_sparekatalog_aar" placeholder="F.eks. 2019, 2023">
-        </div>
-        <div class="field">
-          <label for="f_sparekatalog_dato">Kommunens sparekatalog udkom</label>
-          <input type="date" id="f_sparekatalog_dato">
-          <p class="field-hint" id="sparekatalogDatoHint">Datoen gælder hele kommunen og vises på alle væresteder i den.</p>
-        </div>
-        <div class="field">
-          <label for="f_samlet_budget">Samlet budget (kr.)</label>
-          <input type="number" id="f_samlet_budget" min="0" step="1000" placeholder="F.eks. 1250000">
-        </div>
-        <div class="field">
-          <label for="f_politik_noter">Noter</label>
-          <textarea id="f_politik_noter" placeholder="F.eks. politiske forhold, aftaler eller andet at huske..." style="min-height:140px;"></textarea>
-        </div>
-      </div>
+      <!-- Sparekatalog, samlet budget og politik-noter er taget ud af brugerfladen.
+           Felterne er skjulte, så de værdier, der allerede er gemt, bliver bevaret,
+           når et værested gemmes. Kommunens sparekatalog-dato ligger nu kun på kommunen. -->
+      <input type="hidden" id="f_sparekatalog_for">
+      <input type="hidden" id="f_sparekatalog_aar">
+      <input type="hidden" id="f_samlet_budget">
+      <input type="hidden" id="f_politik_noter">
 
       <div class="modal-tab-content" id="venueTabNote" style="display:none;">
         <div class="field">
@@ -1658,6 +1640,30 @@
           <button class="btn btn-danger" id="deleteVenueBtn" style="display:none;">Slet</button>
           <button class="btn btn-primary" id="saveVenueBtn">Gem værested</button>
         </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- VÆRESTEDETS AKTIVITETER MODAL -->
+<div class="overlay" id="aktiviteterOverlay">
+  <div class="modal">
+    <div class="modal-head">
+      <h2>Værestedets aktiviteter</h2>
+      <button class="modal-close" id="aktiviteterClose">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="field">
+        <label>Indsatser og aktiviteter</label>
+        <p class="field-hint">Sæt gerne flere krydser.</p>
+        <div id="indsatserList"></div>
+      </div>
+      <div class="field" id="indsatserAndetField" style="display:none;">
+        <label for="f_indsatser_andet">Uddyb</label>
+        <input type="text" id="f_indsatser_andet" placeholder="Beskriv kort">
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-primary" id="aktiviteterOkBtn" type="button">Færdig</button>
       </div>
     </div>
   </div>
@@ -1851,7 +1857,8 @@ const els = {};
  "f_rusmiddelpolitik","f_rusmiddel_andet","rusmiddelAndetField",
  "maalgruppeList","f_maalgruppe_andet","maalgruppeAndetField",
  "indsatserList","f_indsatser_andet","indsatserAndetField",
- "f_sparekatalog_for","f_sparekatalog_aar","sparekatalogAarField","f_sparekatalog_dato","sparekatalogDatoHint",
+ "f_sparekatalog_for","f_sparekatalog_aar",
+ "openAktiviteterBtn","aktiviteterOverlay","aktiviteterClose","aktiviteterOkBtn",
  "f_samlet_budget","f_politik_noter","k_sparekatalog_dato","budgetControls","budgetAggSelect","legendBudget",
  "f_medlem_siden","medlemSidenField","formerMemberBanner","f_status","statusSuperuserHint",
  "deleteVenueBtn","saveVenueBtn",
@@ -2953,7 +2960,6 @@ function switchVenueTab(tab){
   document.getElementById('venueTabGenerelt').style.display = tab === 'generelt' ? 'block' : 'none';
   document.getElementById('venueTabDetaljer').style.display = tab === 'detaljer' ? 'block' : 'none';
   document.getElementById('venueTabKontakt').style.display = tab === 'kontakt' ? 'block' : 'none';
-  document.getElementById('venueTabPolitik').style.display = tab === 'politik' ? 'block' : 'none';
   document.getElementById('venueTabNote').style.display = tab === 'note' ? 'block' : 'none';
 }
 els.venueModalTabs.addEventListener('click', (e) => {
@@ -3009,8 +3015,8 @@ function openVenueModal(id){
   updateRusmiddelAndetVisibility();
   updateMaalgruppeAndetVisibility();
   updateIndsatserAndetVisibility();
-  updateSparekatalogAarVisibility();
-  fillSparekatalogDato(els.f_kommune.value);
+  lukAktiviteter();
+
   els.memberToggle.checked = v ? !!v.medlem : true;
   els.kontingentToggle.checked = v ? !!v.kontingentBetalt : false;
   updateToggleLabel();
@@ -3055,20 +3061,21 @@ function updateMaalgruppeAndetVisibility(){
 function updateIndsatserAndetVisibility(){
   els.indsatserAndetField.style.display =
     valgteFra(els.indsatserList).includes('Andet') ? 'block' : 'none';
+  updateAktiviteterBtnLabel();
 }
 els.f_rusmiddelpolitik.addEventListener('change', updateRusmiddelAndetVisibility);
 
-// Datoen hører til kommunen, så den hentes ud fra den valgte kommune og
-// er ens for alle væresteder i kommunen.
-function fillSparekatalogDato(kommuneCode){
-  const info = db.kommuneInfo[kommuneCode];
-  els.f_sparekatalog_dato.value = info ? (info.sparekatalogDato || '') : '';
+function updateAktiviteterBtnLabel(){
+  const antal = valgteFra(els.indsatserList).length;
+  els.openAktiviteterBtn.textContent = antal === 0
+    ? 'Se aktiviteter'
+    : `Se aktiviteter (${antal} valgt)`;
 }
-function updateSparekatalogAarVisibility(){
-  els.sparekatalogAarField.style.display = els.f_sparekatalog_for.value === 'Ja' ? 'block' : 'none';
-}
-els.f_sparekatalog_for.addEventListener('change', updateSparekatalogAarVisibility);
-els.f_kommune.addEventListener('change', () => fillSparekatalogDato(els.f_kommune.value));
+function lukAktiviteter(){ els.aktiviteterOverlay.classList.remove('open'); }
+els.openAktiviteterBtn.addEventListener('click', () => els.aktiviteterOverlay.classList.add('open'));
+els.aktiviteterClose.addEventListener('click', lukAktiviteter);
+els.aktiviteterOkBtn.addEventListener('click', lukAktiviteter);
+els.aktiviteterOverlay.addEventListener('click', (e) => { if(e.target === els.aktiviteterOverlay) lukAktiviteter(); });
 
 function closeVenueModal(){ els.venueOverlay.classList.remove('open'); editingVenueId = null; }
 
@@ -3180,7 +3187,6 @@ els.saveVenueBtn.addEventListener('click', async ()=>{
     if(error){ showToast('Kunne ikke oprette værested'); console.error(error); return; }
     db.vaerested.push(rowToVenue(data));
   }
-  await saveSparekatalogDato(kommuneCode, els.f_sparekatalog_dato.value);
   closeVenueModal();
   renderAll();
   showToast('Værested gemt');

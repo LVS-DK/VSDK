@@ -2243,6 +2243,7 @@ function renderMap(){
   });
   updateLabelFontSizes();
   renderInset(matchSet);
+  if(!kortErTilpasset) kortErTilpasset = fitMapView();
 }
 
 // Fast hovedstads-udsnit i det tomme havområde nordøst for Sjælland (SVG-koordinater).
@@ -2408,10 +2409,47 @@ function clampPan(){
   mapTransform.y = Math.min(maxOffsetY, Math.max(-maxOffsetY, mapTransform.y));
 }
 
+// Kortet fylder som udgangspunkt så meget af feltet som muligt, i stedet for at
+// ligge lille i midten. Beregnes efter vinduets størrelse, så det passer på
+// både store og små skærme.
+const VIEWBOX_W = 780, VIEWBOX_H = 950;
+let kortErTilpasset = false;
+
+function fitMapView(){
+  const svg = els.dkMap;
+  const rect = svg.getBoundingClientRect();
+  if(!rect.width || !rect.height) return false;
+  const gruppe = document.getElementById('mapZoomGroup');
+  let indhold;
+  try{ indhold = gruppe.getBBox(); }catch(e){ return false; }
+  if(!indhold || !indhold.width || !indhold.height) return false;
+
+  // Hvor meget af viewBox'en der faktisk er synlig i feltet
+  const pxPrEnhed = Math.min(rect.width / VIEWBOX_W, rect.height / VIEWBOX_H);
+  const synligBredde = rect.width / pxPrEnhed;
+  const synligHoejde = rect.height / pxPrEnhed;
+
+  const skala = Math.min(
+    MAX_SCALE,
+    Math.max(MIN_SCALE, Math.min(synligBredde / indhold.width, synligHoejde / indhold.height) * 0.96)
+  );
+  const midtX = indhold.x + indhold.width / 2;
+  const midtY = indhold.y + indhold.height / 2;
+  mapTransform = {
+    x: VIEWBOX_W / 2 - skala * midtX,
+    y: VIEWBOX_H / 2 - skala * midtY,
+    scale: skala
+  };
+  applyMapTransform();
+  updateLabelFontSizes();
+  return true;
+}
+
 function resetMapView(){
   mapTransform = { x: 0, y: 0, scale: 1 };
   applyMapTransform();
   updateLabelFontSizes();
+  fitMapView();
 }
 
 function initMapZoomPan(){
@@ -3973,6 +4011,8 @@ els.refreshBtn.addEventListener('click', async () => {
 
 // ---------- INIT ----------
 initMapZoomPan();
+// Første tilpasning sker, når kortet er tegnet; derefter ved ændring af vinduet.
+window.addEventListener('resize', () => fitMapView());
 loadDB();
 subscribeRealtime();
 </script>

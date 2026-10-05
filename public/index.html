@@ -1442,7 +1442,7 @@
         <button class="modal-tab active" data-tab="generelt">Generelt</button>
         <button class="modal-tab" data-tab="detaljer">Detaljer</button>
         <button class="modal-tab" data-tab="kontakt">Kontakt</button>
-        <button class="modal-tab" data-tab="politik">Politik</button>
+        <button class="modal-tab" data-tab="politik">Økonomi</button>
         <button class="modal-tab" data-tab="note">Note</button>
       </div>
 
@@ -1480,48 +1480,42 @@
             <option value="Lukket">Lukket</option>
           </select>
         </div>
+        <!-- Det gamle fritekstfelt "Type værested" er erstattet af dropdownen nedenfor.
+             Kolonnen type og de gamle værdier bliver i databasen. -->
+        <input type="hidden" id="f_type">
         <div class="field">
-          <label for="f_type">Type værested</label>
-          <input type="text" id="f_type" placeholder="F.eks. Værested for hjemløse, Cafémiljø, Aktivitetscenter">
-        </div>
-        <div class="field">
-          <label for="f_tilknytning">Driftsform</label>
-          <select id="f_tilknytning">
-            <option value="Offentligt">Offentligt</option>
-            <option value="Privat">Privat</option>
-            <option value="Frivilligt drevet">Frivilligt drevet</option>
-          </select>
-        </div>
-        <div class="field">
-          <label for="f_finansiering">Finansiering</label>
-          <select id="f_finansiering">
+          <label for="f_rusmiddelpolitik">Rusmiddelpolitik</label>
+          <select id="f_rusmiddelpolitik">
             <option value="">Ikke angivet</option>
-            <option value="Offentlig">Offentlig</option>
-            <option value="Privat">Privat</option>
-            <option value="Delvist offentligt tilskud">Delvist offentligt tilskud</option>
+            <option value="Fuldstændig rusfrit">Fuldstændig rusfrit (ikke påvirket på værestedet)</option>
+            <option value="Ingen indtag på værestedet">Ingen indtag af rusmidler på værestedet</option>
+            <option value="Kontrolleret indtag på værestedet">Må indtage rusmidler i kontrolleret form på værestedet</option>
+            <option value="Andet">Andet</option>
           </select>
         </div>
-        <div class="field-row">
-          <div class="field">
-            <label for="f_ansatte">Antal ansatte</label>
-            <select id="f_ansatte">
-              <option value="">Ikke angivet</option>
-              <option value="1-3">1-3</option>
-              <option value="4-6">4-6</option>
-              <option value="7-10">7-10</option>
-              <option value="10+">10+</option>
-            </select>
-          </div>
-          <div class="field">
-            <label for="f_frivillige">Antal frivillige</label>
-            <select id="f_frivillige">
-              <option value="">Ikke angivet</option>
-              <option value="1-3">1-3</option>
-              <option value="4-6">4-6</option>
-              <option value="7-10">7-10</option>
-              <option value="10+">10+</option>
-            </select>
-          </div>
+        <div class="field" id="rusmiddelAndetField" style="display:none;">
+          <label for="f_rusmiddel_andet">Uddyb</label>
+          <input type="text" id="f_rusmiddel_andet" placeholder="Beskriv kort">
+        </div>
+
+        <div class="field">
+          <label>Målgruppe primære</label>
+          <p class="field-hint">Sæt gerne flere krydser.</p>
+          <div id="maalgruppeList"></div>
+        </div>
+        <div class="field" id="maalgruppeAndetField" style="display:none;">
+          <label for="f_maalgruppe_andet">Uddyb andre sociale problemer</label>
+          <input type="text" id="f_maalgruppe_andet" placeholder="Beskriv kort">
+        </div>
+
+        <div class="field">
+          <label>Indsatser/aktiviteter</label>
+          <p class="field-hint">Sæt gerne flere krydser.</p>
+          <div id="indsatserList"></div>
+        </div>
+        <div class="field" id="indsatserAndetField" style="display:none;">
+          <label for="f_indsatser_andet">Uddyb</label>
+          <input type="text" id="f_indsatser_andet" placeholder="Beskriv kort">
         </div>
       </div>
 
@@ -1585,6 +1579,46 @@
       </div>
 
       <div class="modal-tab-content" id="venueTabPolitik" style="display:none;">
+        <div class="field">
+          <label for="f_tilknytning">Driftsform</label>
+          <select id="f_tilknytning">
+            <option value="Offentligt">Offentligt</option>
+            <option value="Privat">Privat</option>
+            <option value="Frivilligt drevet">Frivilligt drevet</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="f_finansiering">Finansiering</label>
+          <select id="f_finansiering">
+            <option value="">Ikke angivet</option>
+            <option value="Offentlig">Offentlig</option>
+            <option value="Privat">Privat</option>
+            <option value="Delvist offentligt tilskud">Delvist offentligt tilskud</option>
+          </select>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label for="f_ansatte">Antal ansatte</label>
+            <select id="f_ansatte">
+              <option value="">Ikke angivet</option>
+              <option value="1-3">1-3</option>
+              <option value="4-6">4-6</option>
+              <option value="7-10">7-10</option>
+              <option value="10+">10+</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="f_frivillige">Antal frivillige</label>
+            <select id="f_frivillige">
+              <option value="">Ikke angivet</option>
+              <option value="1-3">1-3</option>
+              <option value="4-6">4-6</option>
+              <option value="7-10">7-10</option>
+              <option value="10+">10+</option>
+            </select>
+          </div>
+        </div>
+
         <div class="field">
           <label for="f_sparekatalog_for">Har været i sparekatalog før</label>
           <select id="f_sparekatalog_for">
@@ -1814,6 +1848,9 @@ const els = {};
  "f_leder_navn","f_leder_telefon","f_leder_email","f_leder_noter",
  "f_kontakt_navn","f_kontakt_titel","f_kontakt_telefon","f_kontakt_email","f_kontakt_noter",
  "f_foretrukken_kontakt","statusField",
+ "f_rusmiddelpolitik","f_rusmiddel_andet","rusmiddelAndetField",
+ "maalgruppeList","f_maalgruppe_andet","maalgruppeAndetField",
+ "indsatserList","f_indsatser_andet","indsatserAndetField",
  "f_sparekatalog_for","f_sparekatalog_aar","sparekatalogAarField","f_sparekatalog_dato","sparekatalogDatoHint",
  "f_samlet_budget","f_politik_noter","k_sparekatalog_dato","budgetControls","budgetAggSelect","legendBudget",
  "f_medlem_siden","medlemSidenField","formerMemberBanner","f_status","statusSuperuserHint",
@@ -1827,6 +1864,36 @@ const els = {};
  "medierSection","medieList","addMedieBtn","medieForm","mf_navn","mf_note","medieCancelBtn","medieSaveBtn",
  "toast"
 ].forEach(id => els[id] = document.getElementById(id));
+
+// ---------- FASTE VALGMULIGHEDER ----------
+const MAALGRUPPE_VALG = [
+  'Personer med aktivt brug af rusmidler',
+  'Tidligere brugere af rusmidler',
+  'Psykiske udfordringer',
+  'Ensomme',
+  'Andre sociale problemer'
+];
+const INDSATSER_VALG = [
+  'Spisning på stedet',
+  'Fællesskabsaktiviteter (sport, craft, natur mv.)',
+  'Aktiviteter ude af huset',
+  'Beskæftigelsesrettet hjælp',
+  'Økonomisk hjælp',
+  'Udlevering af fødevarer/mad',
+  'Fremskudt behandling fra kommune eller region',
+  'Sundhedstiltag',
+  'Andet'
+];
+
+// Gemmes som JSON-liste i databasen, så kommaer i valgmulighederne ikke driller.
+function parseListe(raw){
+  if(Array.isArray(raw)) return raw;
+  if(!raw) return [];
+  try{
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : [];
+  }catch(e){ return []; }
+}
 
 // ---------- STORAGE (Supabase) ----------
 function rowToVenue(r){
@@ -1862,7 +1929,13 @@ function rowToVenue(r){
     sparekatalogFor: r.sparekatalog_for || '',
     sparekatalogAar: r.sparekatalog_aar || '',
     samletBudget: (r.samlet_budget === null || r.samlet_budget === undefined) ? '' : String(r.samlet_budget),
-    politikNoter: r.politik_noter || ''
+    politikNoter: r.politik_noter || '',
+    rusmiddelpolitik: r.rusmiddelpolitik || '',
+    rusmiddelAndet: r.rusmiddel_andet || '',
+    maalgruppe: parseListe(r.maalgruppe),
+    maalgruppeAndet: r.maalgruppe_andet || '',
+    indsatser: parseListe(r.indsatser),
+    indsatserAndet: r.indsatser_andet || ''
   };
 }
 function venueToRow(v){
@@ -1897,7 +1970,13 @@ function venueToRow(v){
     sparekatalog_for: v.sparekatalogFor || '',
     sparekatalog_aar: v.sparekatalogAar || '',
     samlet_budget: v.samletBudget === '' || v.samletBudget === null || v.samletBudget === undefined ? null : Number(v.samletBudget),
-    politik_noter: v.politikNoter || ''
+    politik_noter: v.politikNoter || '',
+    rusmiddelpolitik: v.rusmiddelpolitik || '',
+    rusmiddel_andet: v.rusmiddelAndet || '',
+    maalgruppe: v.maalgruppe || [],
+    maalgruppe_andet: v.maalgruppeAndet || '',
+    indsatser: v.indsatser || [],
+    indsatser_andet: v.indsatserAndet || ''
   };
 }
 
@@ -2755,7 +2834,7 @@ function renderList(){
         <div class="vc-name">${escapeHtml(v.navn)}${v.note ? ' <span class=\"vc-note-flag\" title=\"Har en note\">📝</span>' : ''}</div>
         <div class="vc-badge ${v.medlem?'member':'nonmember'}">${v.medlem?'Medlem':'Ikke medlem'}</div>
       </div>
-      <div class="vc-meta">${escapeHtml(v.type || 'Type ikke angivet')} · ${escapeHtml(v.tilknytning || 'Ukendt tilknytning')}</div>
+      <div class="vc-meta">${escapeHtml(v.rusmiddelpolitik || v.type || 'Type ikke angivet')} · ${escapeHtml(v.tilknytning || 'Ukendt tilknytning')}</div>
       ${(v.status === 'Lukket' || (v.tidligereMedlem && !v.medlem)) ? `<div class="vc-tags">
         ${v.status === 'Lukket' ? '<span class="vc-tag vc-tag-closed">Lukket</span>' : ''}
         ${(v.tidligereMedlem && !v.medlem) ? '<span class="vc-tag vc-tag-former">Tidligere medlem</span>' : ''}
@@ -2883,6 +2962,15 @@ function openVenueModal(id){
   els.f_sparekatalog_aar.value = v ? (v.sparekatalogAar || '') : '';
   els.f_samlet_budget.value = v ? (v.samletBudget || '') : '';
   els.f_politik_noter.value = v ? (v.politikNoter || '') : '';
+  els.f_rusmiddelpolitik.value = v ? (v.rusmiddelpolitik || '') : '';
+  els.f_rusmiddel_andet.value = v ? (v.rusmiddelAndet || '') : '';
+  els.f_maalgruppe_andet.value = v ? (v.maalgruppeAndet || '') : '';
+  els.f_indsatser_andet.value = v ? (v.indsatserAndet || '') : '';
+  byggCheckboxListe(els.maalgruppeList, MAALGRUPPE_VALG, 'mg_', v ? (v.maalgruppe || []) : [], updateMaalgruppeAndetVisibility);
+  byggCheckboxListe(els.indsatserList, INDSATSER_VALG, 'ind_', v ? (v.indsatser || []) : [], updateIndsatserAndetVisibility);
+  updateRusmiddelAndetVisibility();
+  updateMaalgruppeAndetVisibility();
+  updateIndsatserAndetVisibility();
   updateSparekatalogAarVisibility();
   fillSparekatalogDato(els.f_kommune.value);
   els.memberToggle.checked = v ? !!v.medlem : true;
@@ -2897,6 +2985,41 @@ function openVenueModal(id){
 
   els.venueOverlay.classList.add('open');
 }
+function byggCheckboxListe(container, valg, idPrefix, valgte, onChange){
+  container.innerHTML = '';
+  valg.forEach((navn, i) => {
+    const id = idPrefix + i;
+    const row = document.createElement('label');
+    row.className = 'checkbox-row';
+    const box = document.createElement('input');
+    box.type = 'checkbox';
+    box.id = id;
+    box.value = navn;
+    box.checked = valgte.includes(navn);
+    box.addEventListener('change', onChange);
+    row.appendChild(box);
+    row.appendChild(document.createTextNode(' ' + navn));
+    container.appendChild(row);
+  });
+}
+function valgteFra(container){
+  return [...container.querySelectorAll('input[type=checkbox]')]
+    .filter(b => b.checked)
+    .map(b => b.value);
+}
+function updateRusmiddelAndetVisibility(){
+  els.rusmiddelAndetField.style.display = els.f_rusmiddelpolitik.value === 'Andet' ? 'block' : 'none';
+}
+function updateMaalgruppeAndetVisibility(){
+  els.maalgruppeAndetField.style.display =
+    valgteFra(els.maalgruppeList).includes('Andre sociale problemer') ? 'block' : 'none';
+}
+function updateIndsatserAndetVisibility(){
+  els.indsatserAndetField.style.display =
+    valgteFra(els.indsatserList).includes('Andet') ? 'block' : 'none';
+}
+els.f_rusmiddelpolitik.addEventListener('change', updateRusmiddelAndetVisibility);
+
 // Datoen hører til kommunen, så den hentes ud fra den valgte kommune og
 // er ens for alle væresteder i kommunen.
 function fillSparekatalogDato(kommuneCode){
@@ -3000,7 +3123,13 @@ els.saveVenueBtn.addEventListener('click', async ()=>{
     sparekatalogFor: els.f_sparekatalog_for.value,
     sparekatalogAar: els.f_sparekatalog_for.value === 'Ja' ? els.f_sparekatalog_aar.value.trim() : '',
     samletBudget: els.f_samlet_budget.value,
-    politikNoter: els.f_politik_noter.value.trim()
+    politikNoter: els.f_politik_noter.value.trim(),
+    rusmiddelpolitik: els.f_rusmiddelpolitik.value,
+    rusmiddelAndet: els.f_rusmiddelpolitik.value === 'Andet' ? els.f_rusmiddel_andet.value.trim() : '',
+    maalgruppe: valgteFra(els.maalgruppeList),
+    maalgruppeAndet: valgteFra(els.maalgruppeList).includes('Andre sociale problemer') ? els.f_maalgruppe_andet.value.trim() : '',
+    indsatser: valgteFra(els.indsatserList),
+    indsatserAndet: valgteFra(els.indsatserList).includes('Andet') ? els.f_indsatser_andet.value.trim() : ''
   };
   const row = venueToRow(payload);
   if(editingVenueId){

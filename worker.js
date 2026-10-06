@@ -91,6 +91,19 @@ export default {
       );
     }
 
+    // Midlertidigt diagnose-endepunkt: fortæller kun OM app-filen på serveren
+    // indeholder de nye funktioner — ikke noget indhold fra databasen.
+    if (url.pathname === "/_version") {
+      const svar = await env.ASSETS.fetch(new Request(new URL("/index.html", url), request));
+      const html = await svar.text();
+      return new Response(JSON.stringify({
+        bytes: html.length,
+        harAppMode: html.includes("APP_MODE"),
+        harTypeVaerested: html.includes("Type værested"),
+        harSportLink: html.includes("gotoSportBtn")
+      }), { headers: { "Content-Type": "application/json; charset=utf-8" } });
+    }
+
     // Login-endpoint
     if (url.pathname === "/_login" && request.method === "POST") {
       const form = await request.formData();

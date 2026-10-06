@@ -27,7 +27,14 @@ function getCookie(request, name) {
   return match ? decodeURIComponent(match[1]) : null;
 }
 
-function loginPage(errorMsg) {
+// Kun stier på samme side accepteres som viderestilling efter login
+function sikkerSti(raw) {
+  if (!raw) return "/";
+  if (!raw.startsWith("/") || raw.startsWith("//")) return "/";
+  return raw;
+}
+
+function loginPage(errorMsg, next) {
   return `<!DOCTYPE html>
 <html lang="da">
 <head>
@@ -64,7 +71,7 @@ function loginPage(errorMsg) {
     <h1>Væresteder i Danmark</h1>
     <p class="sub">Indtast kodeordet for at få adgang.</p>
     ${errorMsg ? `<div class="err">${errorMsg}</div>` : ""}
-    <form method="POST" action="/_login">
+    <form method="POST" action="/_login?next=${encodeURIComponent(sikkerSti(next))}">
       <input type="password" name="password" placeholder="Kodeord" autofocus required>
       <button type="submit">Log ind</button>
     </form>
@@ -99,10 +106,11 @@ export default {
           "Set-Cookie",
           `${COOKIE_NAME}=${token}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=${MAX_AGE_SECONDS}`
         );
-        headers.set("Location", "/");
+        // Tilbage til den side, man ville ind på — fx /sport.html
+        headers.set("Location", sikkerSti(url.searchParams.get("next")));
         return new Response(null, { status: 302, headers });
       }
-      return new Response(loginPage("Forkert kodeord. Prøv igen."), {
+      return new Response(loginPage("Forkert kodeord. Prøv igen.", url.searchParams.get("next")), {
         status: 401,
         headers: { "Content-Type": "text/html; charset=utf-8" },
       });
@@ -133,7 +141,7 @@ export default {
     }
 
     if (!authenticated) {
-      return new Response(loginPage(), {
+      return new Response(loginPage(null, url.pathname + url.search), {
         status: 200,
         headers: { "Content-Type": "text/html; charset=utf-8" },
       });

@@ -27,6 +27,13 @@ function getCookie(request, name) {
   return match ? decodeURIComponent(match[1]) : null;
 }
 
+// Henter selve appen (index.html) fra assets. Vi beder om "/" og ikke
+// "/index.html": assets-laget svarer med en viderestilling på /index.html,
+// og den ville sende brugeren væk fra /sport.html.
+async function hentApp(env, url) {
+  return env.ASSETS.fetch(new Request(new URL("/", url), { method: "GET" }));
+}
+
 // Kun stier på samme side accepteres som viderestilling efter login
 function sikkerSti(raw) {
   if (!raw) return "/";
@@ -94,9 +101,10 @@ export default {
     // Midlertidigt diagnose-endepunkt: fortæller kun OM app-filen på serveren
     // indeholder de nye funktioner — ikke noget indhold fra databasen.
     if (url.pathname === "/_version") {
-      const svar = await env.ASSETS.fetch(new Request(new URL("/index.html", url), request));
+      const svar = await hentApp(env, url);
       const html = await svar.text();
       return new Response(JSON.stringify({
+        status: svar.status,
         bytes: html.length,
         harAppMode: html.includes("APP_MODE"),
         harTypeVaerested: html.includes("Type værested"),
@@ -163,8 +171,13 @@ export default {
     // Sportskortet er den samme app i en anden tilstand. Vi serverer index.html
     // på /sport og /sport.html, så adressen bliver stående i browseren.
     if (url.pathname === "/sport" || url.pathname === "/sport.html") {
-      const indexUrl = new URL("/index.html", url);
-      return env.ASSETS.fetch(new Request(indexUrl, request));
+      const svar = await hentApp(env, url);
+      // Vi sender indholdet videre som vores eget svar, så adressen i browseren
+      // bliver stående på /sport.html.
+      return new Response(svar.body, {
+        status: svar.status,
+        headers: { "Content-Type": "text/html; charset=utf-8" }
+      });
     }
 
     // Godkendt -> server den statiske fil (index.html m.fl.) fra ASSETS-bindingen

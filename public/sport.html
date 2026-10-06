@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+<meta charset="UTF-8">
+<title>Sport — Væresteder i Danmark</title>
+<!-- Sportskortet er den samme app i en anden tilstand. worker.js serverer
+     normalt index.html direkte på /sport.html; denne fil er reserven, hvis
+     forespørgslen når frem til den statiske fil i stedet. -->
+<meta http-equiv="refresh" content="0; url=/?app=sport">
+<script>location.replace('/?app=sport');</script>
+</head>
+<body>
+<p>Åbner sportskortet… <a href="/?app=sport">Klik her, hvis der ikke sker noget.</a></p>
+</body>
+</html>

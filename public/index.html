@@ -936,6 +936,40 @@
   .field-row{display:flex;gap:10px;}
   .field-row .field{flex:1;}
 
+  .logline{
+    border:1px solid var(--line);
+    border-radius:9px;
+    padding:11px 13px;
+    margin-bottom:9px;
+    background:var(--paper);
+  }
+  .logline-top{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+    margin-bottom:5px;
+  }
+  .logline-dato{
+    font-size:12px;
+    font-weight:700;
+    color:var(--ink);
+  }
+  .logline-noter{
+    font-size:13.5px;
+    color:var(--ink-soft);
+    white-space:pre-wrap;
+  }
+  .logline-slet{
+    border:none;
+    background:none;
+    color:var(--ink-soft);
+    cursor:pointer;
+    font-size:13px;
+    padding:2px 6px;
+    border-radius:6px;
+  }
+  .logline-slet:hover{ background:var(--panel-2); color:#B33F3F; }
   .aktiviteter-btn{
     width:100%;
     margin-top:4px;
@@ -1569,6 +1603,20 @@
       </div>
 
       <div class="modal-tab-content" id="venueTabKontakt" style="display:none;">
+        <div class="kontakt-group">
+          <div class="kontakt-group-title">Registrér en samtale</div>
+          <div class="field">
+            <label for="f_sidste_kontakt">Sidste kontakt</label>
+            <input type="date" id="f_sidste_kontakt">
+          </div>
+          <div class="field">
+            <label for="f_kontakt_log_noter">Hvad talte I om?</label>
+            <textarea id="f_kontakt_log_noter" placeholder="F.eks. aftalte at sende materiale, eller de overvejer medlemskab"></textarea>
+          </div>
+          <p class="field-hint" id="sidsteKontaktHint">Udfyldes felterne, bliver de lagt i kontaktloggen, når du gemmer.</p>
+          <button class="btn btn-ghost aktiviteter-btn" id="openKontaktLogBtn" type="button">Se kontaktlog</button>
+        </div>
+
         <div class="field">
           <label for="f_foretrukken_kontakt">Foretrukken kontakt</label>
           <select id="f_foretrukken_kontakt">
@@ -1648,6 +1696,19 @@
           <button class="btn btn-primary" id="saveVenueBtn">Gem værested</button>
         </div>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- KONTAKTLOG MODAL -->
+<div class="overlay" id="kontaktLogOverlay">
+  <div class="modal">
+    <div class="modal-head">
+      <h2 id="kontaktLogTitel">Kontaktlog</h2>
+      <button class="modal-close" id="kontaktLogClose">✕</button>
+    </div>
+    <div class="modal-body">
+      <div id="kontaktLogListe"></div>
     </div>
   </div>
 </div>
@@ -1839,7 +1900,7 @@ const SUPABASE_URL = 'https://bmfnsqlhvosbbcdsexko.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJtZm5zcWxodm9zYmJjZHNleGtvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM5OTc5NzAsImV4cCI6MjA5OTU3Mzk3MH0.PRk6J3rHIp1l1JSi4Vx3dVgfDxSDysrVHpvYMx7jj4E';
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-let db = { vaerested: [], kommuneInfo: {}, events: [], signups: [] };
+let db = { vaerested: [], kommuneInfo: {}, events: [], signups: [], kontaktlog: [] };
 let selectedKommune = null; // {code, name}
 let editingVenueId = null;
 let searchQuery = "";
@@ -1866,6 +1927,8 @@ const els = {};
  "indsatserList","f_indsatser_andet","indsatserAndetField",
  "f_sparekatalog_for","f_sparekatalog_aar",
  "openAktiviteterBtn","aktiviteterOverlay","aktiviteterClose","aktiviteterOkBtn",
+ "f_sidste_kontakt","f_kontakt_log_noter","sidsteKontaktHint","openKontaktLogBtn",
+ "kontaktLogOverlay","kontaktLogClose","kontaktLogTitel","kontaktLogListe",
  "f_samlet_budget","f_politik_noter","k_sparekatalog_dato","budgetControls","budgetAggSelect","legendBudget",
  "f_medlem_siden","medlemSidenField","formerMemberBanner","f_status","statusSuperuserHint",
  "deleteVenueBtn","saveVenueBtn",
@@ -2030,6 +2093,15 @@ function eventToRow(e){
     noter: e.noter
   };
 }
+function rowToLog(r){
+  return {
+    id: r.id,
+    vaerestedId: r.vaerested_id,
+    dato: r.dato || '',
+    noter: r.noter || ''
+  };
+}
+
 function rowToSignup(r){
   return {
     id: r.id,
@@ -2060,6 +2132,12 @@ async function reloadEvents(){
   db.events = (data || []).map(rowToEvent);
   renderAll();
 }
+async function reloadKontaktlog(){
+  const { data, error } = await sb.from('kontaktlog').select('*');
+  if(error){ console.error('Kunne ikke hente kontaktloggen', error); return; }
+  db.kontaktlog = (data || []).map(rowToLog);
+  renderAll();
+}
 async function reloadSignups(){
   const { data, error } = await sb.from('tilmeldinger').select('*');
   if(error){ console.error('Kunne ikke hente tilmeldinger', error); return; }
@@ -2069,11 +2147,12 @@ async function reloadSignups(){
 
 async function loadDB(){
   try{
-    const [venuesRes, kommuneRes, eventsRes, signupsRes] = await Promise.all([
+    const [venuesRes, kommuneRes, eventsRes, signupsRes, logRes] = await Promise.all([
       sb.from('vaeresteder').select('*'),
       sb.from('kommune_info').select('*'),
       sb.from('sportsbegivenheder').select('*'),
-      sb.from('tilmeldinger').select('*')
+      sb.from('tilmeldinger').select('*'),
+      sb.from('kontaktlog').select('*')
     ]);
     if(venuesRes.error) throw venuesRes.error;
     if(kommuneRes.error) throw kommuneRes.error;
@@ -2089,6 +2168,9 @@ async function loadDB(){
 
     db.events = (eventsRes.data || []).map(rowToEvent);
     db.signups = (signupsRes.data || []).map(rowToSignup);
+    // Kontaktloggen må gerne fejle uden at vælte resten (fx hvis tabellen ikke er oprettet endnu)
+    if(logRes.error){ console.error('Kunne ikke hente kontaktloggen', logRes.error); }
+    db.kontaktlog = (logRes.data || []).map(rowToLog);
   }catch(e){
     console.error('Kunne ikke hente data fra Supabase', e);
     showToast('Kunne ikke forbinde til databasen — tjek forbindelsen og genindlæs siden');
@@ -2104,6 +2186,7 @@ function subscribeRealtime(){
     .on('postgres_changes', { event: '*', schema: 'public', table: 'kommune_info' }, () => { reloadKommuneInfo(); })
     .on('postgres_changes', { event: '*', schema: 'public', table: 'sportsbegivenheder' }, () => { reloadEvents(); })
     .on('postgres_changes', { event: '*', schema: 'public', table: 'tilmeldinger' }, () => { reloadSignups(); })
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'kontaktlog' }, () => { reloadKontaktlog(); })
     .subscribe();
 }
 
@@ -3039,6 +3122,10 @@ function openVenueModal(id){
   updateMaalgruppeAndetVisibility();
   updateIndsatserAndetVisibility();
   lukAktiviteter();
+  els.f_sidste_kontakt.value = '';
+  els.f_kontakt_log_noter.value = '';
+  els.kontaktLogOverlay.classList.remove('open');
+  updateSidsteKontaktHint();
 
   els.memberToggle.checked = v ? !!v.medlem : true;
   els.kontingentToggle.checked = v ? !!v.kontingentBetalt : false;
@@ -3095,6 +3182,87 @@ function updateAktiviteterBtnLabel(){
     : `Se aktiviteter (${antal} valgt)`;
 }
 function lukAktiviteter(){ els.aktiviteterOverlay.classList.remove('open'); }
+
+// ---------- KONTAKTLOG ----------
+function kontaktlogFor(vaerestedId){
+  return db.kontaktlog
+    .filter(l => l.vaerestedId === vaerestedId)
+    .sort((a,b) => (b.dato || '').localeCompare(a.dato || ''));
+}
+function sidsteKontakt(vaerestedId){
+  const log = kontaktlogFor(vaerestedId);
+  return log.length > 0 ? log[0].dato : '';
+}
+function formatDato(iso){
+  if(!iso) return '';
+  const d = new Date(iso + 'T00:00:00');
+  if(isNaN(d)) return iso;
+  return d.toLocaleDateString('da-DK', { day: 'numeric', month: 'long', year: 'numeric' });
+}
+function updateSidsteKontaktHint(){
+  const sidste = editingVenueId ? sidsteKontakt(editingVenueId) : '';
+  const antal = editingVenueId ? kontaktlogFor(editingVenueId).length : 0;
+  els.sidsteKontaktHint.textContent = sidste
+    ? `Seneste registrerede kontakt: ${formatDato(sidste)}. Udfyldes felterne, bliver de lagt i kontaktloggen, når du gemmer.`
+    : 'Der er ingen registreret kontakt endnu. Udfyldes felterne, bliver de lagt i kontaktloggen, når du gemmer.';
+  els.openKontaktLogBtn.textContent = antal === 0
+    ? 'Se kontaktlog'
+    : `Se kontaktlog (${antal} ${antal === 1 ? 'samtale' : 'samtaler'})`;
+}
+function renderKontaktLog(){
+  const v = editingVenueId ? db.vaerested.find(x => x.id === editingVenueId) : null;
+  els.kontaktLogTitel.textContent = v ? `Kontaktlog — ${v.navn}` : 'Kontaktlog';
+  const log = editingVenueId ? kontaktlogFor(editingVenueId) : [];
+  if(log.length === 0){
+    els.kontaktLogListe.innerHTML = '<div class="empty-hint">Der er ikke registreret nogen samtaler endnu.</div>';
+    return;
+  }
+  els.kontaktLogListe.innerHTML = '';
+  log.forEach(l => {
+    const linje = document.createElement('div');
+    linje.className = 'logline';
+    linje.innerHTML = `
+      <div class="logline-top">
+        <span class="logline-dato">${escapeHtml(formatDato(l.dato) || 'Uden dato')}</span>
+        <button class="logline-slet superuser-only" data-id="${l.id}" title="Slet linjen">Slet</button>
+      </div>
+      ${l.noter ? `<div class="logline-noter">${escapeHtml(l.noter)}</div>` : '<div class="logline-noter">Ingen noter</div>'}
+    `;
+    const sletBtn = linje.querySelector('.logline-slet');
+    sletBtn.addEventListener('click', () => sletLoglinje(l.id));
+    els.kontaktLogListe.appendChild(linje);
+  });
+}
+async function sletLoglinje(id){
+  if(!confirm('Slet denne linje i kontaktloggen?')) return;
+  const { error } = await sb.from('kontaktlog').delete().eq('id', id);
+  if(error){ showToast('Kunne ikke slette linjen'); console.error(error); return; }
+  db.kontaktlog = db.kontaktlog.filter(l => l.id !== id);
+  renderKontaktLog();
+  updateSidsteKontaktHint();
+  showToast('Linjen er slettet');
+}
+// Gemmer en ny linje, hvis der er skrevet noget i felterne.
+async function gemKontaktlinje(vaerestedId){
+  const noter = els.f_kontakt_log_noter.value.trim();
+  const dato = els.f_sidste_kontakt.value || (noter ? new Date().toISOString().slice(0,10) : '');
+  if(!dato && !noter) return;
+  const { data, error } = await sb.from('kontaktlog')
+    .insert({ vaerested_id: vaerestedId, dato: dato || null, noter })
+    .select().single();
+  if(error){ showToast('Kunne ikke gemme i kontaktloggen'); console.error(error); return; }
+  db.kontaktlog.push(rowToLog(data));
+  els.f_sidste_kontakt.value = '';
+  els.f_kontakt_log_noter.value = '';
+}
+els.openKontaktLogBtn.addEventListener('click', () => {
+  renderKontaktLog();
+  els.kontaktLogOverlay.classList.add('open');
+});
+els.kontaktLogClose.addEventListener('click', () => els.kontaktLogOverlay.classList.remove('open'));
+els.kontaktLogOverlay.addEventListener('click', (e) => {
+  if(e.target === els.kontaktLogOverlay) els.kontaktLogOverlay.classList.remove('open');
+});
 els.openAktiviteterBtn.addEventListener('click', () => els.aktiviteterOverlay.classList.add('open'));
 els.aktiviteterClose.addEventListener('click', lukAktiviteter);
 els.aktiviteterOkBtn.addEventListener('click', lukAktiviteter);
@@ -3205,10 +3373,12 @@ els.saveVenueBtn.addEventListener('click', async ()=>{
     if(error){ showToast('Kunne ikke gemme værested'); console.error(error); return; }
     const idx = db.vaerested.findIndex(x=>x.id===editingVenueId);
     if(idx>-1) db.vaerested[idx] = {...db.vaerested[idx], ...payload};
+    await gemKontaktlinje(editingVenueId);
   } else {
     const { data, error } = await sb.from('vaeresteder').insert(row).select().single();
     if(error){ showToast('Kunne ikke oprette værested'); console.error(error); return; }
     db.vaerested.push(rowToVenue(data));
+    await gemKontaktlinje(data.id);
   }
   closeVenueModal();
   renderAll();

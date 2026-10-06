@@ -1238,6 +1238,10 @@
   ::-webkit-scrollbar{width:9px;height:9px;}
   ::-webkit-scrollbar-thumb{background:var(--line);border-radius:5px;}
   ::-webkit-scrollbar-track{background:transparent;}
+
+  /* To apps i én fil: Danmarkskortet og sportskortet (/sport.html). */
+  body.app-kort .sport-only{ display:none !important; }
+  body.app-sport .kort-only{ display:none !important; }
 </style>
 </head>
 <body>
@@ -1255,16 +1259,18 @@
     <div class="topbar-spacer"></div>
     <span class="superuser-badge" id="superuserBadge">⚡ Superbruger</span>
     <button class="btn btn-ghost btn-icon-only" id="refreshBtn" title="Genopfrisk forbindelse til Supabase">🔄</button>
-    <button class="btn btn-ghost" id="openSportsBtn">🏅 Sportsbegivenheder</button>
+    <button class="btn btn-ghost sport-only" id="openSportsBtn">🏅 Sportsbegivenheder</button>
     <button class="btn btn-ghost" id="openExportBtn">📥 Eksportér</button>
-    <button class="btn btn-primary" id="newVenueBtn">+ Nyt værested</button>
+    <a class="btn btn-ghost kort-only" id="gotoSportBtn" href="sport.html">🏅 Sportskortet</a>
+    <a class="btn btn-ghost sport-only" id="gotoKortBtn" href="index.html">🗺 Danmarkskortet</a>
+    <button class="btn btn-primary kort-only" id="newVenueBtn">+ Nyt værested</button>
   </div>
 
   <div class="main">
     <div class="nav-pane">
       <div class="nav-tabs" id="navTabs">
-        <button class="nav-tab active" data-tab="venues">Væresteder</button>
-        <button class="nav-tab" data-tab="events">🏅 Sportsbegivenheder</button>
+        <button class="nav-tab active kort-only" data-tab="venues">Væresteder</button>
+        <button class="nav-tab sport-only" data-tab="events">🏅 Sportsbegivenheder</button>
       </div>
 
       <div class="nav-tab-content" id="navVenuesTab">
@@ -1281,7 +1287,7 @@
             <span class="nq-label">Ikke medlemmer</span>
             <span class="nq-count" id="nqNonmemberCount">0</span>
           </button>
-          <button class="nav-quick-btn is-sport" data-mode="sport-all">
+          <button class="nav-quick-btn is-sport sport-only" data-mode="sport-all">
             <span class="nq-label">🏅 Deltaget i sport</span>
             <span class="nq-count" id="nqSportCount">0</span>
           </button>
@@ -1315,11 +1321,11 @@
         </g>
       </svg>
       <div class="map-tooltip" id="mapTooltip"><div class="t-name"></div><div class="t-sub"></div></div>
-      <div class="map-mode-switch" id="mapModeSwitch">
+      <div class="map-mode-switch kort-only" id="mapModeSwitch">
         <label for="mapModeSelect">Kortvisning</label>
         <select id="mapModeSelect">
           <option value="medlem">Medlem / Ikke medlem</option>
-          <option value="sport">Deltaget i sport / Ikke deltaget</option>
+          <option value="sport" class="sport-only">Deltaget i sport / Ikke deltaget</option>
           <option value="kontingent">Kontingent betalt / Ikke betalt</option>
           <option value="tidslinje">Medlemsudvikling over tid</option>
           <option value="budget">Samlet budget</option>
@@ -1373,7 +1379,7 @@
     </div>
 
     <div class="sidebar">
-      <div class="stats-row">
+      <div class="stats-row kort-only">
         <div class="stat total">
           <div class="num" id="statTotal">0</div>
           <div class="lbl">Oprettet</div>
@@ -1395,9 +1401,9 @@
         </div>
         <div class="sh-count" id="shCount">0 væresteder</div>
         <div class="sh-actions" id="shActions" style="display:none;">
-          <button class="btn btn-ghost btn-sm" id="byraadBtn">🏛 Byråd &amp; medier</button>
+          <button class="btn btn-ghost btn-sm kort-only" id="byraadBtn">🏛 Byråd &amp; medier</button>
         </div>
-        <div class="sh-sparekatalog" id="shSparekatalog" style="display:none;">
+        <div class="sh-sparekatalog kort-only" id="shSparekatalog" style="display:none;">
           <label for="sh_sparekatalog_dato">🗂 Kommunens sparekatalog udkom</label>
           <input type="date" id="sh_sparekatalog_dato">
         </div>
@@ -1415,7 +1421,7 @@
     <div class="modal-head" id="venueModalHead">
       <h2 id="venueModalTitle">Nyt værested</h2>
       <div class="modal-head-actions">
-        <button class="modal-icon-btn" id="showVenueEventsBtn" title="Se sportsbegivenheder" style="display:none;">🏅</button>
+        <button class="modal-icon-btn sport-only" id="showVenueEventsBtn" title="Se sportsbegivenheder" style="display:none;">🏅</button>
         <button class="modal-close" id="venueModalClose">✕</button>
       </div>
     </div>
@@ -1784,9 +1790,9 @@
       <div class="field">
         <label for="exportDatasetSelect">Datasæt</label>
         <select id="exportDatasetSelect">
-          <option value="venues">Væresteder</option>
-          <option value="signups">Sportstilmeldinger</option>
-          <option value="kommuner">Kommuneoversigt</option>
+          <option value="venues" class="kort-only">Væresteder</option>
+          <option value="signups" class="sport-only">Sportstilmeldinger</option>
+          <option value="kommuner" class="kort-only">Kommuneoversigt</option>
         </select>
       </div>
 
@@ -1871,6 +1877,21 @@ const els = {};
  "medierSection","medieList","addMedieBtn","medieForm","mf_navn","mf_note","medieCancelBtn","medieSaveBtn",
  "toast"
 ].forEach(id => els[id] = document.getElementById(id));
+
+// ---------- HVILKEN APP ER VI I? ----------
+// Samme fil bruges to steder: Danmarkskortet på / og sportskortet på /sport.html.
+// Sporten håndteres udelukkende i sportskortet, så de to brugerflader kan holdes enkle.
+const APP_MODE = (
+  /(^|\/)sport(\.html)?$/i.test(location.pathname) ||
+  /[?&]app=sport/i.test(location.search) ||
+  location.hash.toLowerCase() === '#sport'
+) ? 'sport' : 'kort';
+const ER_SPORT = APP_MODE === 'sport';
+document.body.classList.add('app-' + APP_MODE);
+if(ER_SPORT){
+  document.title = 'Sport — Væresteder i Danmark';
+  document.querySelector('.brand h1').textContent = 'Sport for Livet';
+}
 
 // ---------- FASTE VALGMULIGHEDER ----------
 const MAALGRUPPE_VALG = [
@@ -2879,15 +2900,16 @@ function renderList(){
         <div class="vc-name">${escapeHtml(v.navn)}${v.note ? ' <span class=\"vc-note-flag\" title=\"Har en note\">📝</span>' : ''}</div>
         <div class="vc-badge ${v.medlem?'member':'nonmember'}">${v.medlem?'Medlem':'Ikke medlem'}</div>
       </div>
-      <div class="vc-meta">${escapeHtml(v.rusmiddelpolitik || v.type || 'Type ikke angivet')} · ${escapeHtml(v.tilknytning || 'Ukendt tilknytning')}</div>
+      <div class="vc-meta">${ER_SPORT ? escapeHtml(v.kommuneName || 'Ukendt kommune') : escapeHtml(v.rusmiddelpolitik || v.type || 'Type ikke angivet') + ' · ' + escapeHtml(v.tilknytning || 'Ukendt tilknytning')}</div>
       ${(v.status === 'Lukket' || (v.tidligereMedlem && !v.medlem)) ? `<div class="vc-tags">
         ${v.status === 'Lukket' ? '<span class="vc-tag vc-tag-closed">Lukket</span>' : ''}
         ${(v.tidligereMedlem && !v.medlem) ? '<span class="vc-tag vc-tag-former">Tidligere medlem</span>' : ''}
       </div>` : ''}
       ${(searchQuery) ? `<div class="vc-kommune">${escapeHtml(v.kommuneName||'')}</div>` : ''}
-      ${mySignups.length > 0 ? `<div class="vc-kommune">🏅 ${signupTotal} bruger${signupTotal===1?'':'e'} tilmeldt (${mySignups.length} begivenhed${mySignups.length===1?'':'er'})</div>` : ''}
+      ${(ER_SPORT && mySignups.length > 0) ? `<div class="vc-kommune">🏅 ${signupTotal} bruger${signupTotal===1?'':'e'} tilmeldt (${mySignups.length} begivenhed${mySignups.length===1?'':'er'})</div>` : ''}
     `;
-    card.addEventListener('click', () => openVenueModal(v.id));
+    // I sportskortet redigeres værestederne ikke — klik viser deres begivenheder.
+    card.addEventListener('click', () => ER_SPORT ? openVenueEventsModal(v.id) : openVenueModal(v.id));
     els.listScroll.appendChild(card);
   });
 }
@@ -3807,13 +3829,15 @@ els.timelinePlayBtn.addEventListener('click', () => {
 });
 
 // ---------- NAV-FANER (Væresteder / Sportsbegivenheder) ----------
+function switchNavTab(tab){
+  els.navTabs.querySelectorAll('.nav-tab').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
+  els.navVenuesTab.style.display = tab === 'venues' ? 'flex' : 'none';
+  els.navEventsTab.style.display = tab === 'events' ? 'flex' : 'none';
+}
 els.navTabs.addEventListener('click', (e) => {
   const btn = e.target.closest('.nav-tab');
   if(!btn) return;
-  els.navTabs.querySelectorAll('.nav-tab').forEach(b => b.classList.toggle('active', b === btn));
-  const tab = btn.dataset.tab;
-  els.navVenuesTab.style.display = tab === 'venues' ? 'flex' : 'none';
-  els.navEventsTab.style.display = tab === 'events' ? 'flex' : 'none';
+  switchNavTab(btn.dataset.tab);
 });
 
 // ---------- EKSPORTÉR DATA ----------
@@ -4016,6 +4040,20 @@ els.refreshBtn.addEventListener('click', async () => {
 });
 
 // ---------- INIT ----------
+// Valgmuligheder, der hører til den anden app, fjernes helt fra dropdownene.
+document.querySelectorAll(ER_SPORT ? 'select .kort-only' : 'select .sport-only').forEach(o => o.remove());
+if(ER_SPORT){
+  // Sportskortet starter på begivenhederne og farvelægger efter deltagelse.
+  mapColorMode = 'sport';
+  els.mapModeSelect.value = 'sport';
+  switchNavTab('events');
+  els.legendModeText.textContent = LEGEND_TEXT.sport;
+  els.exportDatasetSelect.value = 'signups';
+  renderExportFieldList();
+} else {
+  // Danmarkskortet har ingen sport: ryd eventuelle valgte begivenheder.
+  eventFilterIds.clear();
+}
 initMapZoomPan();
 // Første tilpasning sker, når kortet er tegnet; derefter ved ændring af vinduet.
 window.addEventListener('resize', () => fitMapView());

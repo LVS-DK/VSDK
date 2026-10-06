@@ -25,6 +25,19 @@ VSDK/
 └─ README.md
 ```
 
+## To apps, én fil
+
+`public/index.html` er både Danmarkskortet og sportskortet. Hvilken app man er i,
+afgøres af adressen: `/sport` og `/sport.html` giver sportsappen, alt andet giver
+Danmarkskortet. `worker.js` serverer `index.html` på begge sportsadresser, så
+adressen bliver stående i browseren.
+
+- `APP_MODE` / `ER_SPORT` i toppen af scriptet afgør tilstanden.
+- Markup markeres med klasserne `kort-only` og `sport-only`; CSS skjuler den
+  modsatte app's elementer, og `<option>`-elementer fjernes helt ved opstart.
+- Grunden til ét fil og ikke to: kortdataene fylder 149 KB af filen og skulle
+  ellers vedligeholdes to steder.
+
 Appen er bevidst **én stor single-file HTML-app** med indlejret CSS og JavaScript.
 Det er ikke en fejl, der skal "ryddes op" — del den ikke op i moduler eller
 introducér et build-step uden at aftale det med Brian først.
@@ -51,8 +64,9 @@ introducér et build-step uden at aftale det med Brian først.
   Finansiering (gensidigt udelukkende checkbokse: Offentlig / Privat / Delvist
   offentligt tilskud), samt Antal ansatte og Antal frivillige som intervaller
   (1–3, 4–6, 7–10, 10+).
-- **Sport for Livet**: sportsbegivenheder med tilmelding pr. værested og
-  multi-valg af begivenheder.
+- **Sport for Livet** ligger i sin egen app på `/sport.html` (se "To apps, én fil"
+  nedenfor): sportsbegivenheder med tilmelding pr. værested og multi-valg af
+  begivenheder. Hovedappen indeholder ikke sport.
 - Byråds- og mediekontakter pr. kommune.
 - Eksport til Excel/CSV med valg af felter.
 - **Superuser-tilstand**: aktiveres ved at skrive `BrianBrianBrian` i søgefeltet;

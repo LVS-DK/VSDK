@@ -139,6 +139,13 @@ export default {
       });
     }
 
+    // Sportskortet er den samme app i en anden tilstand. Vi serverer index.html
+    // på /sport og /sport.html, så adressen bliver stående i browseren.
+    if (url.pathname === "/sport" || url.pathname === "/sport.html") {
+      const indexUrl = new URL("/index.html", url);
+      return env.ASSETS.fetch(new Request(indexUrl, request));
+    }
+
     // Godkendt -> server den statiske fil (index.html m.fl.) fra ASSETS-bindingen
     return env.ASSETS.fetch(request);
   },

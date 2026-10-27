@@ -16,8 +16,17 @@ create index if not exists kontaktlog_vaerested_idx on kontaktlog (vaerested_id)
 -- Samme adgang som de øvrige tabeller: appen bruger den offentlige anon-nøgle.
 alter table kontaktlog enable row level security;
 
-drop policy if exists "kontaktlog alle" on kontaktlog;
-create policy "kontaktlog alle" on kontaktlog
-  for all
-  using (true)
-  with check (true);
+-- Oprettes kun, hvis den ikke findes i forvejen. Ingen sletning, så Supabase
+-- ikke advarer om destruktive handlinger.
+do $$
+begin
+  if not exists (
+    select 1 from pg_policies
+    where schemaname = 'public' and tablename = 'kontaktlog' and policyname = 'kontaktlog alle'
+  ) then
+    create policy "kontaktlog alle" on kontaktlog
+      for all
+      using (true)
+      with check (true);
+  end if;
+end $$;

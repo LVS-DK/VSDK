@@ -936,6 +936,44 @@
   .field-row{display:flex;gap:10px;}
   .field-row .field{flex:1;}
 
+  .holdleder-raekke{
+    border:1px solid var(--line);
+    border-radius:9px;
+    padding:10px 11px;
+    margin-bottom:9px;
+    background:var(--paper);
+  }
+  .holdleder-raekke .field{ margin-bottom:8px; }
+  .holdleder-raekke .field:last-child{ margin-bottom:0; }
+  .holdleder-top{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    margin-bottom:6px;
+  }
+  .holdleder-nr{
+    font-size:11px;
+    font-weight:700;
+    text-transform:uppercase;
+    letter-spacing:.06em;
+    color:var(--ink-soft);
+  }
+  .holdleder-fjern{
+    border:none;
+    background:none;
+    color:var(--ink-soft);
+    cursor:pointer;
+    font-size:13px;
+    padding:2px 7px;
+    border-radius:6px;
+  }
+  .holdleder-fjern:hover{ background:var(--panel-2); color:#B33F3F; }
+  .holdleder-knapper{
+    display:flex;
+    gap:8px;
+    margin-top:4px;
+  }
+  .holdleder-knapper .btn{ flex:1; }
   .logline{
     border:1px solid var(--line);
     border-radius:9px;
@@ -1857,6 +1895,16 @@
       <button class="modal-close" id="venueEventsClose">✕</button>
     </div>
     <div class="modal-body">
+      <div class="kontakt-group">
+        <div class="kontakt-group-title">Holdledere</div>
+        <div id="holdlederListe"></div>
+        <div class="holdleder-knapper">
+          <button class="btn btn-ghost btn-sm" id="tilfoejHoldlederBtn" type="button">+ Tilføj holdleder</button>
+          <button class="btn btn-primary btn-sm" id="gemHoldledereBtn" type="button">Gem holdledere</button>
+        </div>
+      </div>
+
+      <div class="sd-section-title">Sportsbegivenheder</div>
       <div id="venueEventsList"></div>
     </div>
   </div>
@@ -1924,7 +1972,7 @@ const SUPABASE_URL = 'https://bmfnsqlhvosbbcdsexko.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJtZm5zcWxodm9zYmJjZHNleGtvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM5OTc5NzAsImV4cCI6MjA5OTU3Mzk3MH0.PRk6J3rHIp1l1JSi4Vx3dVgfDxSDysrVHpvYMx7jj4E';
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-let db = { vaerested: [], kommuneInfo: {}, events: [], signups: [], kontaktlog: [] };
+let db = { vaerested: [], kommuneInfo: {}, events: [], signups: [], kontaktlog: [], holdledere: [] };
 let selectedKommune = null; // {code, name}
 let editingVenueId = null;
 let searchQuery = "";
@@ -1961,6 +2009,7 @@ const els = {};
  "exportDatasetSelect","exportFieldList","exportSelectAllBtn","exportSelectNoneBtn","exportFormatToggle","exportRunBtn",
  "sportsOverlay","sportsModalClose","sportsEventListPlanned","sportsEventListPast","sportsEventSearch","sportsDetailPane","newEventBtn",
  "showVenueEventsBtn","venueEventsOverlay","venueEventsTitle","venueEventsClose","venueEventsList",
+ "holdlederListe","tilfoejHoldlederBtn","gemHoldledereBtn",
  "byraadList","addByraadBtn","byraadForm","bf_navn","bf_borgmester","bf_socialudvalg","byraadCancelBtn","byraadSaveBtn",
  "medierSection","medieList","addMedieBtn","medieForm","mf_navn","mf_note","medieCancelBtn","medieSaveBtn",
  "toast"
@@ -2125,6 +2174,16 @@ function eventToRow(e){
     noter: e.noter
   };
 }
+function rowToHoldleder(r){
+  return {
+    id: r.id,
+    vaerestedId: r.vaerested_id,
+    navn: r.navn || '',
+    email: r.email || '',
+    telefon: r.telefon || ''
+  };
+}
+
 function rowToLog(r){
   return {
     id: r.id,
@@ -2164,6 +2223,11 @@ async function reloadEvents(){
   db.events = (data || []).map(rowToEvent);
   renderAll();
 }
+async function reloadHoldledere(){
+  const { data, error } = await sb.from('holdledere').select('*');
+  if(error){ console.error('Kunne ikke hente holdledere', error); return; }
+  db.holdledere = (data || []).map(rowToHoldleder);
+}
 async function reloadKontaktlog(){
   const { data, error } = await sb.from('kontaktlog').select('*');
   if(error){ console.error('Kunne ikke hente kontaktloggen', error); return; }
@@ -2179,12 +2243,13 @@ async function reloadSignups(){
 
 async function loadDB(){
   try{
-    const [venuesRes, kommuneRes, eventsRes, signupsRes, logRes] = await Promise.all([
+    const [venuesRes, kommuneRes, eventsRes, signupsRes, logRes, holdRes] = await Promise.all([
       sb.from('vaeresteder').select('*'),
       sb.from('kommune_info').select('*'),
       sb.from('sportsbegivenheder').select('*'),
       sb.from('tilmeldinger').select('*'),
-      sb.from('kontaktlog').select('*')
+      sb.from('kontaktlog').select('*'),
+      sb.from('holdledere').select('*')
     ]);
     if(venuesRes.error) throw venuesRes.error;
     if(kommuneRes.error) throw kommuneRes.error;
@@ -2203,6 +2268,8 @@ async function loadDB(){
     // Kontaktloggen må gerne fejle uden at vælte resten (fx hvis tabellen ikke er oprettet endnu)
     if(logRes.error){ console.error('Kunne ikke hente kontaktloggen', logRes.error); }
     db.kontaktlog = (logRes.data || []).map(rowToLog);
+    if(holdRes.error){ console.error('Kunne ikke hente holdledere', holdRes.error); }
+    db.holdledere = (holdRes.data || []).map(rowToHoldleder);
   }catch(e){
     console.error('Kunne ikke hente data fra Supabase', e);
     showToast('Kunne ikke forbinde til databasen — tjek forbindelsen og genindlæs siden');
@@ -2219,6 +2286,7 @@ function subscribeRealtime(){
     .on('postgres_changes', { event: '*', schema: 'public', table: 'sportsbegivenheder' }, () => { reloadEvents(); })
     .on('postgres_changes', { event: '*', schema: 'public', table: 'tilmeldinger' }, () => { reloadSignups(); })
     .on('postgres_changes', { event: '*', schema: 'public', table: 'kontaktlog' }, () => { reloadKontaktlog(); })
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'holdledere' }, () => { reloadHoldledere(); })
     .subscribe();
 }
 
@@ -3978,10 +4046,106 @@ async function deleteEvent(id){
 }
 
 // ---------- VÆRESTEDETS SPORTSBEGIVENHEDER ----------
+// ---------- HOLDLEDERE ----------
+// Rækkerne redigeres i vinduet og gemmes samlet, så man kan rette flere ad gangen.
+let holdlederVaerestedId = null;
+let fjernedeHoldlederIds = [];
+
+function tegnHoldlederRaekke(h){
+  const raekke = document.createElement('div');
+  raekke.className = 'holdleder-raekke';
+  raekke.dataset.id = h && h.id ? h.id : '';
+  raekke.innerHTML = `
+    <div class="holdleder-top">
+      <span class="holdleder-nr"></span>
+      <button class="holdleder-fjern" type="button" title="Fjern holdlederen">Fjern</button>
+    </div>
+    <div class="field">
+      <label>Navn</label>
+      <input type="text" class="hl-navn" placeholder="F.eks. Mette Sørensen">
+    </div>
+    <div class="field-row">
+      <div class="field">
+        <label>Telefon</label>
+        <input type="text" class="hl-telefon" placeholder="12 34 56 78">
+      </div>
+      <div class="field">
+        <label>E-mail</label>
+        <input type="text" class="hl-email" placeholder="holdleder@sted.dk">
+      </div>
+    </div>
+  `;
+  raekke.querySelector('.hl-navn').value = h ? h.navn : '';
+  raekke.querySelector('.hl-telefon').value = h ? h.telefon : '';
+  raekke.querySelector('.hl-email').value = h ? h.email : '';
+  raekke.querySelector('.holdleder-fjern').addEventListener('click', () => {
+    if(raekke.dataset.id) fjernedeHoldlederIds.push(raekke.dataset.id);
+    raekke.remove();
+    if(els.holdlederListe.children.length === 0) els.holdlederListe.appendChild(tegnHoldlederRaekke(null));
+    nummererHoldledere();
+  });
+  return raekke;
+}
+function nummererHoldledere(){
+  [...els.holdlederListe.children].forEach((r, i) => {
+    r.querySelector('.holdleder-nr').textContent = 'Holdleder ' + (i + 1);
+  });
+}
+function renderHoldledere(venueId){
+  holdlederVaerestedId = venueId;
+  fjernedeHoldlederIds = [];
+  els.holdlederListe.innerHTML = '';
+  const mine = db.holdledere.filter(h => h.vaerestedId === venueId);
+  if(mine.length === 0){
+    els.holdlederListe.appendChild(tegnHoldlederRaekke(null));
+  } else {
+    mine.forEach(h => els.holdlederListe.appendChild(tegnHoldlederRaekke(h)));
+  }
+  nummererHoldledere();
+}
+els.tilfoejHoldlederBtn.addEventListener('click', () => {
+  els.holdlederListe.appendChild(tegnHoldlederRaekke(null));
+  nummererHoldledere();
+  els.holdlederListe.lastElementChild.querySelector('.hl-navn').focus();
+});
+els.gemHoldledereBtn.addEventListener('click', async () => {
+  if(!holdlederVaerestedId) return;
+  const raekker = [...els.holdlederListe.children].map(r => ({
+    id: r.dataset.id,
+    navn: r.querySelector('.hl-navn').value.trim(),
+    telefon: r.querySelector('.hl-telefon').value.trim(),
+    email: r.querySelector('.hl-email').value.trim()
+  }));
+  // Først det nye og rettede, derefter sletningerne — så intet kan gå tabt undervejs.
+  for(const r of raekker){
+    const tom = !r.navn && !r.telefon && !r.email;
+    if(r.id){
+      if(tom){ fjernedeHoldlederIds.push(r.id); continue; }
+      const { error } = await sb.from('holdledere')
+        .update({ navn: r.navn, telefon: r.telefon, email: r.email })
+        .eq('id', r.id);
+      if(error){ showToast('Kunne ikke gemme holdlederne'); console.error(error); return; }
+    } else if(!tom){
+      const { error } = await sb.from('holdledere')
+        .insert({ vaerested_id: holdlederVaerestedId, navn: r.navn, telefon: r.telefon, email: r.email });
+      if(error){ showToast('Kunne ikke gemme holdlederne'); console.error(error); return; }
+    }
+  }
+  for(const id of fjernedeHoldlederIds){
+    const { error } = await sb.from('holdledere').delete().eq('id', id);
+    if(error){ showToast('Kunne ikke fjerne en holdleder'); console.error(error); return; }
+  }
+  fjernedeHoldlederIds = [];
+  await reloadHoldledere();
+  renderHoldledere(holdlederVaerestedId);
+  showToast('Holdledere gemt');
+});
+
 function openVenueEventsModal(venueId){
   const v = db.vaerested.find(x => x.id === venueId);
   if(!v) return;
-  els.venueEventsTitle.textContent = v.navn + ' — Sportsbegivenheder';
+  els.venueEventsTitle.textContent = v.navn + ' — Sport';
+  renderHoldledere(venueId);
   const mySignups = db.signups.filter(s => s.vaerestedId === venueId);
   els.venueEventsList.innerHTML = '';
   if(mySignups.length === 0){

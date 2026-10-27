@@ -1634,7 +1634,7 @@
             <label for="f_kontakt_log_noter">Hvad talte I om?</label>
             <textarea id="f_kontakt_log_noter" placeholder="F.eks. aftalte at sende materiale, eller de overvejer medlemskab"></textarea>
           </div>
-          <p class="field-hint" id="sidsteKontaktHint">Udfyldes felterne, bliver de lagt i kontaktloggen, når du gemmer.</p>
+          <p class="field-hint" id="sidsteKontaktHint">Datoen er sat til i dag.</p>
           <button class="btn btn-ghost aktiviteter-btn" id="openKontaktLogBtn" type="button">Se kontaktlog</button>
         </div>
 
@@ -3162,8 +3162,7 @@ function openVenueModal(id){
   updateMaalgruppeAndetVisibility();
   updateIndsatserAndetVisibility();
   lukAktiviteter();
-  els.f_sidste_kontakt.value = '';
-  els.f_kontakt_log_noter.value = '';
+  nulstilKontaktfelter();
   els.kontaktLogOverlay.classList.remove('open');
   updateSidsteKontaktHint();
 
@@ -3243,8 +3242,8 @@ function updateSidsteKontaktHint(){
   const sidste = editingVenueId ? sidsteKontakt(editingVenueId) : '';
   const antal = editingVenueId ? kontaktlogFor(editingVenueId).length : 0;
   els.sidsteKontaktHint.textContent = sidste
-    ? `Seneste registrerede kontakt: ${formatDato(sidste)}. Udfyldes felterne, bliver de lagt i kontaktloggen, når du gemmer.`
-    : 'Der er ingen registreret kontakt endnu. Udfyldes felterne, bliver de lagt i kontaktloggen, når du gemmer.';
+    ? `Seneste registrerede kontakt: ${formatDato(sidste)}. Datoen er sat til i dag — ret den eller skriv noter, så ryger samtalen i loggen, når du gemmer.`
+    : 'Der er ingen registreret kontakt endnu. Datoen er sat til i dag — ret den eller skriv noter, så ryger samtalen i loggen, når du gemmer.';
   els.openKontaktLogBtn.textContent = antal === 0
     ? 'Se kontaktlog'
     : `Se kontaktlog (${antal} ${antal === 1 ? 'samtale' : 'samtaler'})`;
@@ -3282,18 +3281,32 @@ async function sletLoglinje(id){
   updateSidsteKontaktHint();
   showToast('Linjen er slettet');
 }
-// Gemmer en ny linje, hvis der er skrevet noget i felterne.
+function iDag(){
+  const d = new Date();
+  return new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0,10);
+}
+// Datoen er udfyldt med dags dato på forhånd. For at et almindeligt gem ikke
+// skal lave en tom logline, registrerer vi kun en samtale, hvis brugeren har
+// rørt et af de to felter.
+let kontaktlinjeRoert = false;
+function nulstilKontaktfelter(){
+  els.f_sidste_kontakt.value = iDag();
+  els.f_kontakt_log_noter.value = '';
+  kontaktlinjeRoert = false;
+}
+els.f_sidste_kontakt.addEventListener('input', () => { kontaktlinjeRoert = true; });
+els.f_kontakt_log_noter.addEventListener('input', () => { kontaktlinjeRoert = true; });
+
 async function gemKontaktlinje(vaerestedId){
+  if(!kontaktlinjeRoert) return;
   const noter = els.f_kontakt_log_noter.value.trim();
-  const dato = els.f_sidste_kontakt.value || (noter ? new Date().toISOString().slice(0,10) : '');
-  if(!dato && !noter) return;
+  const dato = els.f_sidste_kontakt.value || iDag();
   const { data, error } = await sb.from('kontaktlog')
-    .insert({ vaerested_id: vaerestedId, dato: dato || null, noter })
+    .insert({ vaerested_id: vaerestedId, dato, noter })
     .select().single();
   if(error){ showToast('Kunne ikke gemme i kontaktloggen'); console.error(error); return; }
   db.kontaktlog.push(rowToLog(data));
-  els.f_sidste_kontakt.value = '';
-  els.f_kontakt_log_noter.value = '';
+  nulstilKontaktfelter();
 }
 els.openKontaktLogBtn.addEventListener('click', () => {
   renderKontaktLog();
